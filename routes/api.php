@@ -18,10 +18,15 @@ use Illuminate\Http\Request;
 // });
 
 // Route::group(['middleware' => ['auth']], function(){
-	Route::get('/test', function(Request $request){
-		return response()->json(['name' => 'test']);
-	});
+Route::get('/test', function(Request $request){
+	return response()->json(['name' => 'test']);
+});
 
-	Route::post('/register','UserController@store');
-	Route::get('/tees','TestController@test');
+Route::post('/register','UserController@store');
 
+Route::get('/tees','TestController@test');
+
+Route::post('/login', 'UserController@login');
+
+
+//Route::get('/', ['uses' => 'HomeController@index'])->name('home');

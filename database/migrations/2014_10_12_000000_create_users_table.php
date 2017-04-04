@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('phone');
             $table->string('profileImageURL')->nullable();
             $table->string('activationToken')->unique();
+            // $table->string('apiToken')
             $table->boolean('active')->default(0);
             $table->rememberToken();
             $table->timestamps();
