@@ -18,8 +18,8 @@ use Illuminate\Http\Request;
 // });
 
 // Route::group(['middleware' => ['auth']], function(){
-Route::get('/test', function(Request $request){
-	return response()->json(['name' => 'test']);
+Route::get('/test/{id}', function($id){
+	return response()->json(['name' => $id]);
 });
 
 Route::post('/register','UserController@store');
@@ -27,6 +27,12 @@ Route::post('/register','UserController@store');
 Route::get('/tees','TestController@test');
 
 Route::post('/login', 'UserController@login');
+Route::get('/activate/{token}','UserController@activate');
+
+Route::post('/update', 'UserController@update');
+
+Route::post('/password_reset', 'UserController@forgotPasswordMail');
+//Route::post
 
 
 //Route::get('/', ['uses' => 'HomeController@index'])->name('home');

@@ -7,8 +7,10 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\User;
 use Validator;
+use App\Common;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Mail;
 use App\Mail\ActivationEmail;
 
 class UserController extends Controller 
@@ -50,13 +52,17 @@ class UserController extends Controller
 			$user->activationToken = str_random(60);
 			$user->save();
 
-			//Mail::to($user)->send(new ActivationEmail);
-
-			return response()->json(['status' => '200',
-				'message' => 'Registered' ]);
+			Mail::to($user)->send(new activationEmail($user));
+			$this->code = '0013';
+			$this->message = Common::code($this->code);
 		}
 		else
-			return response()->json(['status' => '006','data' => $validator->errors()]);
+		{
+			$this->code = '0016';
+			$this->message = $validator->errors();
+		}
+		return response()->json(['status' => $this->code,
+				'message' =>$this->message]);
 	}
 
 
@@ -78,39 +84,71 @@ class UserController extends Controller
 
 				if($f == True)
 				{
-					$this->code ='002';
-					$message = "login sucess";
+					$this->code ='0011';
+					$this->message = Common::code($this->code);
 				}
 				else 
 				{
-					$message = "password incorrect";
-					$this->code = '003';
+					$this->code = '0019';
+					$this->message = Common::code($this->code);
 				}
 			}
 			elseif(isset($user) && !$user->active)
 			{	
-				$message = "Email not active";
-				$this->code = '006';
+				
+				$this->code = '0031';
+				$this->message = Common::code($this->code);
 				$user = Null;
 
 			}
 			else
 			{
-				$message = "Email not found";
-				$this->code = '005';
+				
+				$this->code = '0022';
+				$this->message = Common::code($this->code);
 			}
+
 			//$queries = DB::getQueryLog();
 			//return response()->json(['status' => $queries]);
 		}
 		else
 		{
 			$this->code = '004';
-			$message = $validator->errors();
+			$this->message = $validator->errors();
 		}
-		return response()->json(['status' => $this->code, 'message' => $message, 'data' => $user]);
+		return response()->json(['status' => $this->code, 'message' => $this->message, 'data' => $user]);
 	}
 
 
+	public function activate($token)
+	{
+		$user = User::whereActivationToken($token)->first();
+		if(!isset($user))
+		{
+			$this->code = '0052';
+			$this->message= 'Invalid token';
+		}
+		else
+		{
+			$user->active = 1;
+			$user->activation_token = null;
+			$user->save();
+			
+			$this->code = '0018';
+			$this->message = Common::code($this->code);
+		}
+		return response()->json(['status' => $this->code, 'message' => $this->message]);
+	}
+
+	public function update(Request $request)
+	{
+
+	}
+
+	public function forgotPasswordMail(Request $request)
+	{
+
+	}
 
 
 
