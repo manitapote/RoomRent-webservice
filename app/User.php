@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'phone','profileImageURL'
+    'username', 'email', 'password', 'phone','profileImageURL', 'name'
     ];
 
     /**
@@ -24,6 +24,31 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'active', 'activationToken', 'created_at', 'updated_at'
+    'password', 'remember_token', 'active', 'activation_token', 'updated_at', 'forgot_token'
     ];
+
+    public function getValidationRules($rule = 0){
+
+        switch ($rule) {
+            case 1:
+                $forgotPassword = [
+                'email' => 'required|email',
+                'newPassword' => 'required',
+                ];
+                return $forgotPassword;
+                break;
+            case 2:
+                $changePassword = [
+                'api_token' => 'required',
+                'oldPassword' => 'required',
+                'newPassword' => 'required',
+                ];
+                return $changePassword;
+                break;
+
+            default:
+                # code...
+            break;
+        }
+    }
 }

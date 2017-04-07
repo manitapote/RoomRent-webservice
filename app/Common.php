@@ -10,6 +10,7 @@ class Common extends Model {
             // basic messages
             '0000' => 'Error occured',
             '0001' => 'Success',
+            '0002' => 'Valid Token',
 
             // login messages
             '0011' => 'Successfully logged in',
@@ -22,6 +23,7 @@ class Common extends Model {
             '0016' => 'User not registered. Unable to send activation mail',
             '0017' => 'Username Already Exist',
             '0018' => 'User Activated',
+            '0019' => 'Password doesnot match',
 
             // profile update messages
             '0021' => 'Old password doesn\'t match',
@@ -37,7 +39,9 @@ class Common extends Model {
             // invalid request
             '0051' => 'Invalid User',
             '0052' => 'Invalid token',
-            '0053' => 'Invalid Request',
+            '0053' => 'Invalid Request'
+
+           
         );
         return $codes[$code];
     }

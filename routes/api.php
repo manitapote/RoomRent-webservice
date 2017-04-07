@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,8 +32,21 @@ Route::get('/activate/{token}','UserController@activate');
 
 Route::post('/update', 'UserController@update');
 
-Route::post('/password_reset', 'UserController@forgotPasswordMail');
-//Route::post
+Route::post('/forgot_password', 'UserController@mailForgotPassword');
+Route::get('/forgot_password/{token?}', 'UserController@tokenCheckForgotPassword');
 
+Route::post('/reset_password','UserController@resetPassword');
+
+// Route::post('/reset_password', function(){
+
+// 	return redirect()->action('UserController@reset_redirect'); 
+// }); //['middleware' => 'reset_password', 'uses' => 'UserController@resetPassword',
+	
+//Route::get('/reset_redirect','UserController@reset_redirect')->name('direct');
+
+Route::post('/reset_password', [
+	'middleware' => 'reset_password', 
+	'uses' => 'UserController@resetPassword',
+	]);
 
 //Route::get('/', ['uses' => 'HomeController@index'])->name('home');
