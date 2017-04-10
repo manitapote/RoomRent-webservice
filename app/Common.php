@@ -2,9 +2,9 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+//use Illuminate\Database\Eloquent\Model;
 
-class Common extends Model {
+class Common {
     static function code($code) {
         $codes = array(
             // basic messages

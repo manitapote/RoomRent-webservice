@@ -33,7 +33,7 @@ class User extends Authenticatable
             case 1:
                 $forgotPassword = [
                 'email' => 'required|email',
-                'newPassword' => 'required',
+                'newPassword' => 'required|confirmed',
                 ];
                 return $forgotPassword;
                 break;
@@ -45,7 +45,6 @@ class User extends Authenticatable
                 ];
                 return $changePassword;
                 break;
-
             default:
                 # code...
             break;

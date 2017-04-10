@@ -3,40 +3,34 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
-//use Auth;
+
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Route;
 use Mail;
 use Validator;
-
 use App\Common;
 use App\Mail\ActivationEmail;
 use App\Mail\ForgotPasswordEmail;
 use App\User;
 
-class UserController extends Controller 
+class UserController extends Controller
 {
-	// public function __construct()
-	// {
-	// 	$this->middleware('reset_password',['only' => 'reset_password']);
-	// }
-
 	public $response = array();
 
 	public function store(Request $request)
 	{
 		$path ='';
 		$user = new User;
-		$error = '';
+		//$error = '';
 
 		$validator = Validator::make($request->all(), [
 			'email' => 'required|email|unique:users,email',
-			//'name' => 'alphabetic',
+			'name' => 'alpha',
 			'password' => 'required',
 			'phone' => 'numeric',
 			'username' => 'required|min:5|max:35|unique:users,username',
@@ -88,13 +82,11 @@ class UserController extends Controller
 
 	public function login( Request $request)
 	{
-		$loginError = true;
 		$field = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 		$user = User::where($field, $request->identity)->first();
 
-		if ($user) {
+		if ($user && ($user->api_token == Null)) {
 			if (Hash::check($request->password, $user->password)) {
-				$loginError = false;
 				if (!$user->active) {
 					$response = [
 					'uses' => $field,
@@ -123,13 +115,13 @@ class UserController extends Controller
 			'code' => '0012'
 			];
 		}
-			//$response['message'] = sprintf(Common::code($response['code']), $field);
+
 		$response['message'] = Common::code($response['code']);
 		return response($response);
 
-	} 
+	}
 
-	
+
 	public function activate($token)
 	{
 		$user = User::whereActivationToken($token)->first();
@@ -146,7 +138,7 @@ class UserController extends Controller
 		}
 
 		$response['message'] = Common::code($response['status']);
-		return response($response); 
+		return response($response);
 	}
 
 	public function update(Request $request)
@@ -158,7 +150,7 @@ class UserController extends Controller
 	{
 		$user = User::whereEmail($request->email)->first();
 
-		if($user){ 
+		if($user){
 			$user->forgot_token = str_random(60);
 			$user->save();
 			Mail::to($user)->send(new ForgotPasswordEmail($user));
@@ -176,9 +168,10 @@ class UserController extends Controller
 	{
 		$user = User::whereForgotToken($token)->first();
 		if($user){
-			$user->forgot_token = Null;
+			$error = '';
+			//$user->forgot_token = Null;
 			$user->save();
-			$response['status'] = '0002';
+			return view('forgotPasswordForm', compact('user','error'));
 		}
 		else
 			$response['status'] = '0052';
@@ -189,36 +182,56 @@ class UserController extends Controller
 
 	public function resetPassword( Request $request)
 	{
-		//return $request->identity;
 		$u = new User();
-		$field = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'api_token';
-		//return $field;
-		$choice = ($field == 'email')? 1 : 2;
-		//return $choice;
-		//return $u->getValidationRules($choice);
+		$choice = ($request->identity == 'email')? 1 : 2;
 		$validator = Validator::make($request->all(),$u->getValidationRules($choice));
-		//return $validator->errors();
-		if($validator->fails()){
-			$response = ['status' => '0014', 'errors' => $validator->errors()];
+		if($validator->fails() && !$request->email){
+			$response = [
+			'status' => '0014',
+			'errors' => $validator->errors(),
+			];
 			$response['message'] = Common::code($response['status']);
 			return response($response);
 		}
 
-		$user = User::where($field, $request->identity)->first();
-		//return $user;
+		$field = $request->identity;
+		$user = User::where($field, $request->value)->first();
+		
 		if(!isset($user)){
 			$response['status'] = ($field == 'api_token')? '0052' :'0022';
 			$response['message'] = Common::code($response['status']);
 			return response($response);
 		}
 
-		if(($field == 'api_token') && !Hash::check($request->oldPassword, $user->password))
+		if(($field == 'api_token') && !Hash::check($request->oldPassword, $user->password)){
 			$response['status'] = '0021';
-		
-		$user->password = Hash::make($request->oldPassword);
-		$user->save();
-		$response['status'] = '0001';
+		}else {
+			$response['status'] = '0001';
+			$user->password = Hash::make($request->newPassword);
+			$user->save();
+		}
 
+		$response['message'] = Common::code($response['status']);
+
+		if($request->identity == 'email'){
+			if($validator->fails()){
+				$error = $validator->errors();
+				return view ('forgotPasswordForm', compact('error, user'));
+			}
+			else
+				return ("Password Changed Successfully");
+			
+			return response($response);
+		}
+	}
+
+	public function logout(Request $request)
+	{
+		if($user = User::whereApiToken($request->api_token)->first()){
+			$user->update(['api_token' => Null]);
+			$response['status'] = '0001';
+		}else
+		$response['status'] = '0052';
 		$response['message'] = Common::code($response['status']);
 		return response($response);
 	}

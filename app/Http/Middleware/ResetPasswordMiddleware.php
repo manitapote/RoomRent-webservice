@@ -30,17 +30,13 @@ class ResetPasswordMiddleware
 
     public function handle($request, Closure $next)
     {
-        // $user = new User();
         $d = Auth::guard('api')->user();
         $choice = isset($d)? 'api_token' : 'email';
-        
-        // $rule  = isset($d)? $user->getValidationRules(2) : $user->getValidationRules(1);
-        // $validator = Validator::make($request->all(),$rule);
-
-        // if($validator->fails())
-        //     return response()->json(['status' => '0014','message' => 'Validation Error','errors' => $validator->errors()]);
-        // $identity = isset($d)? 'api_token' : 'email';
-        $request->request->add(['identity' => $request->$choice,]);
+        //return response($choice);
+        $request->request->add([
+            'identity' => $choice ,
+            'value' => $request->$choice,
+            ]);
 
         return $next($request);
     }
