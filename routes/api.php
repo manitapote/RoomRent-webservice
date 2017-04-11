@@ -26,11 +26,9 @@ Route::post('/login', 'UserController@login');
 Route::post('/register', 'UserController@store');
 Route::post('/update','UserController@update');
 Route::post('/forgot_password', 'UserController@mailForgotPassword');
-//Route::post('/reset_password', 'UserController@resetPassword');
-Route::post('/reset_password', [
-    'middleware' => 'reset_password',
-    'uses'       => 'UserController@resetPassword',
-]);
+Route::post('/reset_password', 'UserController@resetPassword');
+
 Route::post('/logout', 'UserController@logout');
 Route::post('/formPassword', 'UserController@forgotForm');
+Route::post('/password', 'UserController@forgotPassword');
 

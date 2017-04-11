@@ -8,15 +8,16 @@
 
   <h1>Room Rent</h1>
 
-  <form action = "/api/reset_password" method="post">
+  <form action = "/api/password" method="post">
     {{csrf_field()}}
     @if($error)
-      foreach($error as $e){
-        <div>$e</div>
-      }
+      @foreach ($error->all() as $message)
+        <p>{{$message}}</p>
+      @endforeach
+
     @endif
 
-    <input type="hidden" name="email" value={{$user->email}}>
+    <input type="hidden" name="email" value={{$email}}>
     <div>
       <label>Password</label>
       <input type="password" name = "newPassword" required/>

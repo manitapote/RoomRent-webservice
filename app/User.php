@@ -27,24 +27,21 @@ class User extends Authenticatable
     'password', 'remember_token', 'active', 'activation_token', 'updated_at', 'forgot_token'
     ];
 
-    public function getValidationRules($rule = 0){
+    public function getValidationRules($rule = ''){
 
         switch ($rule) {
-            case 1:
+            case 'forgot':
                 $forgotPassword = [
-                'email' => 'required|email',
                 'newPassword' => 'required|confirmed',
                 ];
                 return $forgotPassword;
-                break;
-            case 2:
+            case 'change':
                 $changePassword = [
                 'api_token' => 'required',
                 'oldPassword' => 'required',
                 'newPassword' => 'required',
                 ];
                 return $changePassword;
-                break;
             default:
                 # code...
             break;
