@@ -17,17 +17,17 @@
 
     @endif
 
-    <input type="hidden" name="email" value={{$email}}>
+    <input type = "hidden" name = "email" value = {{$email}}>
     <div>
       <label>Password</label>
       <input type="password" name = "newPassword" required/>
     </div>
     <div>
       <label>Confirm Password</label>
-      <input type="password" name = "newPassword_confirmation" required/>
+      <input type = "password" name = "newPassword_confirmation" required/>
     </div>
     <div>
-      <input type = "submit" value="Change password"/>
+      <input type = "submit" value = "Change password"/>
     </div>
   </form>
 </body>

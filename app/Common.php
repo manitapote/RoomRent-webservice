@@ -25,7 +25,7 @@ class Common {
             '0024' => 'Password successfully updated',
             '0025' => 'Confirm password didn\'t match',
             // basic errors
-            '0031' => 'User is not verified',
+            '0031' => 'User is not activated',
             '0032' => 'You are not logged in from this device',
             '0033' => 'User already active',
             '0034' => 'You had requested to reset password. Check your email for further processing',
