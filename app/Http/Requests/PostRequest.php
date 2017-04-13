@@ -5,7 +5,9 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Common;
 
-class LoginRequest extends FormRequest
+require app_path().'/validators.php';
+
+class PostRequest extends FormRequest
 {
     /**
      * variable to bind to Common model
@@ -20,8 +22,6 @@ class LoginRequest extends FormRequest
     {
         $this->common = $common;
     }
-
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -40,21 +40,28 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-        'identity'      => 'required',
-        'password'      => 'required',
-        'device_type'   => 'required|numeric',
-        'device_token'  => 'required',
+            'title' => 'string|required',
+            'post_description' => 'string|required',
+            'location' => 'required',
+            'latitude' => 'lat_long',
+            'longitude' => 'lat_long',
+            'price' => 'numeric|required',
+            'no_of_rooms' => 'numeric|required',
+            'file.*' => 'mimes:jpeg,bmp,png,jpg',
+            'offer_or_ask' => 'numeric|required',
         ];
     }
 
-    
-    /**
+     /**
      * @param  array   $errors  Validation errors
      * @return json             
      */
     public function response(array $errors)
     {
-       return response($this->common->message('0014', parent::except(['password']), $errors),400);
+         return response($this->common->message(
+                '0014', 
+                parent::except('api_token'),
+                $errors
+             ));
     }
-
 }

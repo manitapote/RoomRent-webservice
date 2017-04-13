@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Requests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Mail;
@@ -13,77 +12,80 @@ use App\User;
 use App\Device;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\RegisterRequest;
 
 class UserController extends Controller
 {
+    /**
+     * stores response to request
+     * @var array
+     */
     public    $response = [];
+
+    /**
+     * object to bind to Common class
+     * @var Common
+     */
     protected $codeMessage;
+
+    /**
+     * object to bind to User model
+     * @var User
+     */
     protected $user;
-    protected $mail;
+    
+    /**
+     * object to bind to Device model
+     * @var Device
+     */
     protected $device;
 
+    /**
+     * constant to denote active and inactive status
+     */
     const ACTIVE   = 1;
     const INACTIVE = 0;
 
+    /**
+     * @param Common  $codeMessage
+     * @param User    $user
+     * @param Device  $device
+     */
     public function __construct(Common $codeMessage, User $user, Device $device)
     {
         $this->codeMessage = $codeMessage;
         $this->user        = $user;
         $this->device = $device;
-        $this->httpStatus = 200;
     }
 
-    public function store(Request $request)
+    /**
+     * Register the user in users table
+     * 
+     * @param  RegisterRequest $request
+     * @return json
+     */
+    public function store(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email'    => 'required|email|unique:users,email',
-            'name'     => 'alpha',
-            'password' => 'required',
-            'phone'    => 'numeric',
-            'username' => 'required|min:5|max:35|unique:users,username',
-            ]);
+        $user = $request->only(['username','email','phone','name','file']);
+        $user['password']         = Hash::make($request->password);
+        $user['activation_token'] = str_random(60);
+        $user = $this->user->create($user);
 
-        if (!$validator->fails()) {
-            if ($request->file) {
-                $tt   = $request->file;
-                $path = base_path().'/resources/profileImages';
-
-                $binary = base64_decode($tt);
-                $time   = $path.'/'.time().'.jpg';
-                $file   = fopen($time, 'wb');
-                fwrite($file, $binary);
-                fclose($file);
-                $this->user->profileImageURL = $time;
-            }
-
-            $this->user->username         = $request->username;
-            $this->user->password         = Hash::make($request->password);
-            $this->user->email            = $request->email;
-            $this->user->name             = $request->name ? $request->name : null;
-            $this->user->phone            = $request->phone ? $request->phone : null;
-            $this->user->activation_token = str_random(60);
-
-            $this->user->save();
-
-            Mail::to($this->user)->send(new activationEmail($this->user));
-            $response = [
-            'code' => '0013',
-            ];
-            $this->httpStatus = 201;
-        } else {
-            $this->httpStatus = 400;
-            $response = [
-            'errors' => $validator->errors(),
-            'code'   => '0014',
-            'data'   => $request->all(),
-            ];
-        }
-        
+        Mail::to($user)->send(new activationEmail($user));
+        $response = [
+        'code' => '0013',
+        ];
         $response['message'] = $this->codeMessage->code($response['code']);
 
-        return response($response, $this->httpStatus);
+        return response($response);
     }
 
+    /**
+     * Login the user and save the device info to devices table
+     * 
+     * @param  LoginRequest $request
+     * @return json
+     */
     public function login(LoginRequest $request)
     {
         $loginError = true;
@@ -99,7 +101,6 @@ class UserController extends Controller
                     'uses' => $field,
                     'code' => '0031',
                     ];
-                    $this->httpStatus = '401';
                 } else{
                     $user->update(['forgot_token' => null]);
                     $request->merge(array('user_id' => $user->id));
@@ -120,20 +121,27 @@ class UserController extends Controller
             ];
         }
 
-        $response['message'] = sprintf($this->codeMessage->code($response['code']), $field);
+        $response['message'] = sprintf(
+            $this->codeMessage->code($response['code']), $field
+            );
 
-        return response($response, $this->httpStatus);
+        return response($response);
     }
 
-
+    /**
+     * checks the token parameter with api_token in devices table
+     * 
+     * @param  string $token 
+     * @return json
+     */
     public function activate($token)
     {
         $user = $this->user->whereActivationToken($token)->update([
             'active' => self::ACTIVE,
             'activation_token' => null,
             ]);
-        
-        $response['code'] = isset($user) ? '0015' : '0052';
+
+        $response['code'] = ($user) ? '0015' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);
@@ -144,13 +152,18 @@ class UserController extends Controller
 
     }
 
+    /**
+     * Mail to user with forgot password token
+     * 
+     * @param  Request
+     * @return json
+     */
     public function mailForgotPassword(Request $request)
     {
         $user = $this->user->whereEmail($request->email)->first();
 
         if ($user) {
-            $user->forgot_token = str_random(60);
-            $user->save();
+            $user->update(['forgot_token' => str_random(60)]);
             Mail::to($user)->send(new ForgotPasswordEmail($user));
             $response['code'] = "0023";
         } else {
@@ -162,6 +175,12 @@ class UserController extends Controller
         return response($response);
     }
 
+    /**
+     * checks the forgot token from mail with forgot_token in users table
+     *      
+     * @param  string|null
+     * @return html_form|json
+     */
     public function tokenCheckForgotPassword($token = null)
     {
         $user = $this->user->whereForgotToken($token)->first();
@@ -178,9 +197,16 @@ class UserController extends Controller
 
         $response['code'] = '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
+
         return response($response);
     }
 
+    /**
+     * validates the form post and saves new password
+     * 
+     * @param  Request
+     * @return json
+     */
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -200,18 +226,26 @@ class UserController extends Controller
             $response['code']    = '0024';
             $response['message'] = $this->codeMessage->code($response['code']);
         }
+
         return response($response['message']);
     }
 
+    /**
+     * checks if post field oldPassword match with password in users table and 
+     * saves new password
+     * 
+     * @param  ResetPasswordRequest
+     * @return json
+     */
     public function resetPassword(ResetPasswordRequest $request)
     {
-        $device = $this->device->whereApiToken($request->api_token)->first();
+        $device = Auth::guard('api')->user();
 
         if ($device && ($user =  $device->user)) {
             if (Hash::check($request->oldPassword, $user->password)) {
                 $user->update([
                     'password' => Hash::make($request->newPassword)
-                ]);
+                    ]);
                 $response ['code'] = '0001';
             } else
             $response ['code'] = '0021';
@@ -220,13 +254,22 @@ class UserController extends Controller
         'code' => '0032',
         ];
         $response['message'] = $this->codeMessage->code($response['code']);
+
         return response($response);
     }
 
+    /**
+     * Logout the user by deleting the associated api_token from devices table
+     * @param  Request
+     * @return json
+     */
     public function logout(Request $request)
     {
-        $response['code'] = $this->device->whereApiToken($request->api_token)->delete() ? '0020' : '0052';
+        $response['code'] = $this->device
+                            ->whereApiToken($request->api_token)
+                            ->delete() ? '0020' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
+
         return response($response);
     }
 }

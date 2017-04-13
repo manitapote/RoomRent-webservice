@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+ <!DOCTYPE html>
+ <html lang="en">
 
-<head>
+ <head>
   <title>Forgot Password</title>
 </head>
 <body>
@@ -11,9 +11,9 @@
   <form action = "/api/password" method="post">
     {{csrf_field()}}
     @if($error)
-      @foreach ($error->all() as $message)
-        <p>{{$message}}</p>
-      @endforeach
+    @foreach ($error->all() as $message)
+    <p>{{$message}}</p>
+    @endforeach
 
     @endif
 
@@ -32,4 +32,5 @@
   </form>
 </body>
 </html> 
+
 
