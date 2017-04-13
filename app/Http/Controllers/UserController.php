@@ -8,7 +8,11 @@ use Mail;
 use Validator;
 use App\Common;
 use App\Mail\ForgotPasswordEmail;
+use App\Mail\ActivationEmail;   
 use App\User;
+use App\Device;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\ResetPasswordRequest;
 
 class UserController extends Controller
 {
@@ -16,14 +20,17 @@ class UserController extends Controller
     protected $codeMessage;
     protected $user;
     protected $mail;
+    protected $device;
 
     const ACTIVE   = 1;
     const INACTIVE = 0;
 
-    public function __construct(Common $codeMessage, User $user)
+    public function __construct(Common $codeMessage, User $user, Device $device)
     {
         $this->codeMessage = $codeMessage;
         $this->user        = $user;
+        $this->device = $device;
+        $this->httpStatus = 200;
     }
 
     public function store(Request $request)
@@ -34,7 +41,7 @@ class UserController extends Controller
             'password' => 'required',
             'phone'    => 'numeric',
             'username' => 'required|min:5|max:35|unique:users,username',
-        ]);
+            ]);
 
         if (!$validator->fails()) {
             if ($request->file) {
@@ -60,77 +67,73 @@ class UserController extends Controller
 
             Mail::to($this->user)->send(new activationEmail($this->user));
             $response = [
-                'code' => '0013',
+            'code' => '0013',
             ];
+            $this->httpStatus = 201;
         } else {
+            $this->httpStatus = 400;
             $response = [
-                'errors' => $validator->errors(),
-                'code'   => '0014',
-                'data'   => $request->all(),
+            'errors' => $validator->errors(),
+            'code'   => '0014',
+            'data'   => $request->all(),
             ];
         }
-
+        
         $response['message'] = $this->codeMessage->code($response['code']);
 
-        return response($response);
+        return response($response, $this->httpStatus);
     }
 
-
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $loginError = true;
         $field = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $usr   = $this->user->where($field, $request->identity)->first();
+        $user   = $this->user->where($field, $request->identity)->first();
 
-        if ($usr && ($usr->api_token == null)) {
-            if (Hash::check($request->password, $usr->password)) {
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
                 $loginError = false;
-                if (!$usr->active) {
+
+                if (!$user->active) {
                     $response = [
-                        'uses' => $field,
-                        'user' => $usr,
-                        'code' => '0031',
+                    'uses' => $field,
+                    'code' => '0031',
                     ];
-                } else {
-                    $usr->api_token    = str_random(60);
-                    $usr->forgot_token = null;
-                    $usr->save();
+                    $this->httpStatus = '401';
+                } else{
+                    $user->update(['forgot_token' => null]);
+                    $request->merge(array('user_id' => $user->id));
+                    $device = $this->user->storeDevice($request);
                     $response = [
-                        'uses' => $field,
-                        'user' => $usr,
-                        'code' => '0011',
+                    'uses' => $field,
+                    'user' => $user,
+                    'code' => '0011',
+                    'api_token' => $device->api_token,
                     ];
                 }
             }
-
         }
         if ($loginError) {
             $response = [
-                'uses' => $field,
-                'code' => '0012',
+            'uses' => $field,
+            'code' => '0012',
             ];
         }
 
         $response['message'] = sprintf($this->codeMessage->code($response['code']), $field);
 
-        return response($response);
-
+        return response($response, $this->httpStatus);
     }
 
 
     public function activate($token)
     {
-        $usr = $this->user->whereActivationToken($token)->first();
-        if (!isset($usr)) {
-            $response['code'] = '0052';
-        } else {
-            $usr->active           = self::ACTIVE;
-            $usr->activation_token = null;
-            $usr->save();
-
-            $response['code'] = '0015';
-        }
-
+        $user = $this->user->whereActivationToken($token)->update([
+            'active' => self::ACTIVE,
+            'activation_token' => null,
+            ]);
+        
+        $response['code'] = isset($user) ? '0015' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);
@@ -143,12 +146,12 @@ class UserController extends Controller
 
     public function mailForgotPassword(Request $request)
     {
-        $usr = $this->user->whereEmail($request->email)->first();
+        $user = $this->user->whereEmail($request->email)->first();
 
-        if ($usr) {
-            $usr->forgot_token = str_random(60);
-            $usr->save();
-            Mail::to($usr)->send(new ForgotPasswordEmail($usr));
+        if ($user) {
+            $user->forgot_token = str_random(60);
+            $user->save();
+            Mail::to($user)->send(new ForgotPasswordEmail($user));
             $response['code'] = "0023";
         } else {
             $response['code'] = "0022";
@@ -159,22 +162,22 @@ class UserController extends Controller
         return response($response);
     }
 
-
     public function tokenCheckForgotPassword($token = null)
     {
-        $usr = $this->user->whereForgotToken($token)->first();
-        if ($usr) {
+        $user = $this->user->whereForgotToken($token)->first();
+
+        if ($token != null && $user) {
             $error = '';
-            $usr->forgot_token = null;
-            $usr->save();
-            $email = $usr->email;
+            $user->update([
+                'forgot_token' => null
+                ]);
+            $email = $user->email;
 
             return view('forgotPasswordForm', compact('email', 'error'));
-        } else
-            $response['code'] = '0052';
+        }
 
-        $response['message'] = $this->commonRequest->code($response['code']);
-
+        $response['code'] = '0052';
+        $response['message'] = $this->codeMessage->code($response['code']);
         return response($response);
     }
 
@@ -182,69 +185,48 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'newPassword' => 'required|confirmed',
-        ]);
+            ]);
         if ($validator->fails()) {
             $error = $validator->errors();
             $email = $request->email;
 
             return view('forgotPasswordForm', compact('email', 'error'));
         } else {
-            $usr           = $this->user->whereEmail($request->email)->first();
-            $usr->password = Hash::make($request->newPassword);
-            $usr->save();
+            $user           = $this->user->whereEmail($request->email)->first();
+            $user->update([
+                'password' => Hash::make($request->newPassword)
+                ]);
 
-            $response['code'] = '0024';
-
-            $response['message'] = $this->commonRequest->code($response['code']);
+            $response['code']    = '0024';
+            $response['message'] = $this->codeMessage->code($response['code']);
         }
         return response($response['message']);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'api_token'   => 'required',
-            'oldPassword' => 'required',
-            'newPassword' => 'required',
-        ]);
+        $device = $this->device->whereApiToken($request->api_token)->first();
 
-        if ($validator->fails()) {
-            $response            = [
-                'status' => '0014',
-                'errors' => $validator->errors(),
-            ];
-            $response['message'] = $this->codeMessage->code($response['code']);
-
-            return response($response);
-        }
-
-        $usr = $this->user->whereApiToken($request->api_token)->first();
-        if ($usr) {
-            if (Hash::check($request->oldPassword, $usr->password)) {
-                $usr->password = Hash::make($request->newPassword);
-                $usr->save();
+        if ($device && ($user =  $device->user)) {
+            if (Hash::check($request->oldPassword, $user->password)) {
+                $user->update([
+                    'password' => Hash::make($request->newPassword)
+                ]);
                 $response ['code'] = '0001';
             } else
-                $response ['code'] = '0021';
+            $response ['code'] = '0021';
         } else
-            $response = [
-                'status' => '0032',
-                ];
+        $response = [
+        'code' => '0032',
+        ];
         $response['message'] = $this->codeMessage->code($response['code']);
-
         return response($response);
     }
 
     public function logout(Request $request)
     {
-        if ($user = User::whereApiToken($request->api_token)->first()) {
-            $user->update(['api_token' => null]);
-            $response['code'] = '0020';
-        } else
-            $response['code'] = '0052';
+        $response['code'] = $this->device->whereApiToken($request->api_token)->delete() ? '0020' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
-
         return response($response);
     }
-
 }

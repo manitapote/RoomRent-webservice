@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Device;
+use App\Http\Requests\LoginRequest;
 
 class User extends Authenticatable
 {
@@ -20,31 +22,26 @@ class User extends Authenticatable
 
     /**
      * The attributes that should be hidden for arrays.
-     *
+     *  
      * @var array
      */
     protected $hidden = [
     'password', 'remember_token', 'active', 'activation_token', 'updated_at', 'forgot_token'
     ];
-
-    public function getValidationRules($rule = ''){
-
-        switch ($rule) {
-            case 'forgot':
-                $forgotPassword = [
-                'newPassword' => 'required|confirmed',
-                ];
-                return $forgotPassword;
-            case 'change':
-                $changePassword = [
-                'api_token' => 'required',
-                'oldPassword' => 'required',
-                'newPassword' => 'required',
-                ];
-                return $changePassword;
-            default:
-                # code...
-            break;
-        }
-    }
+    
+    public function storeDevice(LoginRequest $request)
+    {
+       $device = Device::updateOrCreate([
+        'device_token' => $request->device_token, 
+        'device_type' => $request->device_type,
+        'user_id' => $request->user_id,
+        ],[
+        'api_token' =>str_random(60)
+        ]);
+       return $device;
+   }
 }
+
+
+
+

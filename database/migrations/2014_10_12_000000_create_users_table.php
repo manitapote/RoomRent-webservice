@@ -19,7 +19,6 @@ class CreateUsersTable extends Migration
             $table->string('username')->unique();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->string('api_token')->nullable()->unique();
             $table->boolean('active')->default(0);
             $table->string('password');
             $table->string('activation_token')->nullable()->unique();
@@ -27,7 +26,7 @@ class CreateUsersTable extends Migration
             $table->string('profileImageURL')->nullable();
             $table->rememberToken();
             $table->timestamps();
-        });
+        }); 
     }
 
     /**
