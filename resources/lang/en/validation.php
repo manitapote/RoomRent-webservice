@@ -85,7 +85,8 @@ return [
     'unique'               => 'The :attribute has already been taken.',
     'uploaded'             => 'The :attribute failed to upload.',
     'url'                  => 'The :attribute format is invalid.',
-
+    "alpha_spaces"         => "The :attribute may only contain letters and spaces.",
+    'lat_long'             => "The :attribute doesnot match the format of latitude and longitude",
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

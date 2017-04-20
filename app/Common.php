@@ -3,6 +3,17 @@
 namespace App;
 
 class Common {
+
+    /**
+     * array to store response code, message, errors
+     * @var array
+     */
+    protected $response = [];
+
+    /**
+     * @param  string $code status code 
+     * @return string message related with status code
+     */
     static function code($code) {
         $codes = array(
             // basic messages
@@ -33,7 +44,24 @@ class Common {
             '0051' => 'Invalid user',
             '0052' => 'Invalid token',
             '0053' => 'Invalid request',
-        );
+            );
         return $codes[$code];
+    }
+
+    /**
+     * @param  string  $code    Status code
+     * @param  Request $request Post data
+     * @param  array   $errors  Validation errors
+     * @return array            array of message, errors and data
+     */
+    static function message($code, $request, $errors)
+    {
+        $response['code'] = $code;
+        $response = array_merge($response,[
+            'message'=> Common::code($response['code']),
+            'errors' => $errors,
+            'data' => $request,
+            ]);
+        return $response;
     }
 }

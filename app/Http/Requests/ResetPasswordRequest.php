@@ -8,6 +8,20 @@ use App\Common;
 class ResetPasswordRequest extends FormRequest
 {
     /**
+     * variable to bind to Common model
+     * @var App\Common
+     */
+    protected $common ;
+
+    /**
+     * @param Common 
+     */
+    public function __construct(Common $common)
+    {
+        $this->common = $common;
+    }
+
+    /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
@@ -22,9 +36,6 @@ class ResetPasswordRequest extends FormRequest
      *
      * @return array
      */
-
-    protected $response = array();
-
     public function rules()
     {
         return [
@@ -34,14 +45,15 @@ class ResetPasswordRequest extends FormRequest
         ];
     }
 
+    /**
+     * @param  array   $errors  Validation errors
+     * @return json             
+     */
     public function response(array $errors)
     {
-        $response['code'] = '0014';
-        $response = array_merge($response,[
-            'message'=> Common::code($response['code']),
-            'errors' => $errors,
-            'data' => parent::all(),
-            ]);
-        return response($response, 400);
+        return response($this->common->message(
+            '0014',
+             parent::except(['password']), 
+            $errors));
     }
 }

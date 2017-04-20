@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +17,6 @@ use App\Http\Controllers\Controller;
 */
 
 
-Route::get('/tees', 'TestController@test');
 Route::get('/activate/{token}', 'UserController@activate');
 Route::get('/forgotpassword/{token?}', 'UserController@tokenCheckForgotPassword');
 
@@ -31,3 +32,15 @@ Route::post('/update','UserController@update');
 Route::post('/logout', 'UserController@logout');
 Route::post('/logintest','UserController@logintest');
 
+Route::group(['middleware' => 'auth:api'], function(){
+
+	Route::post('/getUserPost', 'PostController@getUserPost');
+	// Route::post('/{allPost}',array(
+	// 	'as'   => 'allPost',
+	// 	'uses' => 'PostController@allPost'))
+	// ->where('allPost','(allOffer|allAsk)');
+
+	Route::post('/getAllPost', 'PostController@getAllPost');
+
+	Route::post('/setPost','PostController@setPost');
+});
