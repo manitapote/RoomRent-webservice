@@ -44,3 +44,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::post('/setPost','PostController@setPost');
 });
+
+Route::post('/getLocationByDistance', 'PostController@getLocationByDistance');
+
