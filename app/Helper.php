@@ -2,8 +2,6 @@
 
 namespace App;
 
-use App\Common;
-
 class Helper
 {
 	const R = 6371;  //radius of earth
@@ -72,7 +70,8 @@ class Helper
             '0031' => 'User is not activated',
             '0032' => 'You are not logged in from this device',
             '0033' => 'User already active',
-            '0034' => 'You had requested to reset password. Check your email for further processing',
+            '0034' => 'You had requested to reset password.
+                       Check your email for further processing',
             // invalid request
             '0051' => 'Invalid user',
             '0052' => 'Invalid token',
@@ -83,6 +82,13 @@ class Helper
             '0072'  =>  '%d posts found.',
             '0073'  =>  '%s posted successfully.',
             '0074'  =>  'Unable to store post',
+
+            // file handling
+            '0061'  =>  'Unable to write file' ,
+            '0062'  =>  'Unable to read file (Invalid filename)',
+            '0063'  =>  'Invalid filename',
+            '0064'  =>  'Image uploaded successfully',
+
             );
         return $codes[$code];
     }
@@ -97,7 +103,7 @@ class Helper
     {
         $response['code'] = $code;
         $response = array_merge($response,[
-            'message'=> Common::code($response['code']),
+            'message'=> Helper::code($response['code']),
             'errors' => $errors,
             'data' => $request,
             ]);
@@ -107,11 +113,29 @@ class Helper
 
     static function postResponse($code, $posts)
     {
-    	$response['code'] = $code;
-    	$response = array_merge($response,[
-    				'message' => Helper::code($response['code']),
-    				'post' => $posts,
-		    		]);
+    	$response['code']      = $code;
+    	$response['message']   = Helper::code($response['code']);
+		$response['post']      = $posts;
     	return $response;
+    }
+
+    public static function __callStatic($name,$arg)
+    {
+       if($name == 'userResponse'){
+         $response['code']      = $arg[0];          //0 = Code
+         $response['message']   = Helper::code($response['code']);
+         switch (count($arg)){
+            case 1 : return $response;
+            case 2 :
+                $response['uses'] = $arg[1];        //1 = uses
+                break;
+            case 4 :
+                $response['uses'] = $arg[1];    
+                $response['user'] = $arg[2];        //2 = user
+                $response['api_token'] = $arg[3];   //3 = api_token
+                break;
+         } 
+        }
+        return $response;
     }
 }

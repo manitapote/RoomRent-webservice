@@ -12,13 +12,13 @@
     "schemes": [
         "http"
     ],
+    "produces": [
+        "application/json"
+    ],
     "paths": {
-        "/": {
+        "/api/abc": {
             "get": {
                 "description": "Returns basic information",
-                "produces": [
-                    "application/json"
-                ],
                 "responses": {
                     "200": {
                         "description": "Application Overview"

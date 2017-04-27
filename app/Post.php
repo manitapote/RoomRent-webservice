@@ -44,6 +44,6 @@ class Post extends Model
 	 */
 	public function images()
 	{
-		return Image::wherePostId($this->id)->pluck('image_location');
+		return Image::wherePostId($this->id)->pluck('imageName');
 	}
 }
