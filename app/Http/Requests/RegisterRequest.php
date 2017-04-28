@@ -3,25 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Common;
+use App\Helper;
 
 class RegisterRequest extends FormRequest
 {
-   
-    /**
-     * variable to bind to Common model
-     * @var App\Common
-     */
-    protected $common ;
-
-    /**
-     * @param Common 
-     */
-    public function __construct(Common $common)
-    {
-        $this->common = $common;
-    }
-
      /**
      * Determine if the user is authorized to make this request.
      *
@@ -55,6 +40,6 @@ class RegisterRequest extends FormRequest
      */
     public function response(array $errors)
     {
-        return response($this->common->message('0014', parent::except(['password']), $errors));
+        return response(Helper::message('0014', parent::except(['password']), $errors));
     }
 }

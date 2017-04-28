@@ -39,14 +39,6 @@ class PostController extends Controller
 	protected $offset;
 
 	/**
-	 * constant to denote offer or ask
-	 */
-	const OFFER    = 1;
-	const ASK      = 2;
-	const DISTANCE = 5;
-	const SIZE     = 3;
-
-	/**
 	 * Constructer to bind object to mod el
 	 * 
 	 * @param Post $post 
@@ -68,10 +60,10 @@ class PostController extends Controller
 	 */
 	public function getUserPost(Request $request)
 	{
-		$offset = ($request->offset) ?  $request->offset : 0;
-		$user   = Auth::guard('api')->user()->user;	
-		$posts  = $user->posts;//->skip($offset)->take(self::SIZE)->get();
-
+		$offset              = ($request->offset) ?  $request->offset : 0;
+		$user  				 = Auth::guard('api')->user()->user;	
+		$post 			     = $user->posts;
+		//->skip($offset)->take(self::SIZE)->get();
 		ImageHelper::includeImageUserInPost($posts);
 		$response            = Helper::postResponse('0072', $posts);
 		$response['message'] = sprintf($response['message'],$posts->count());
@@ -87,21 +79,22 @@ class PostController extends Controller
 	 */
 	public function getAllPost(Request $request)
 	{
-		$offset = ($request->offset) ?  $request->offset : 0;
-		$posts  = (!$request->offer_or_ask) ? 
-				  $this->post :
-				  $this->post->where('offer_or_ask',$request->offer_or_ask);
-		$postAfterSkip  = $posts->skip($offset)->take(self::SIZE)->get();
+		$offset 		= ($request->offset) ?  $request->offset : 0;
+		$posts  		= (!$request->offer_or_ask) ? 
+				  		  $this->post :
+				          $this->post->where('offer_or_ask',$request->offer_or_ask);
+		$postAfterSkip  = $posts->skip($offset)
+								->take(config('constants.POST_SIZE'))->get();
 
 		ImageHelper::includeImageUserInPost($postAfterSkip);
 		
-		$response = Helper::postResponse('0072', $postAfterSkip);
-		$response = array_merge($response,[
-					'message' => sprintf($response['message'],$posts->count()),
-					'count'   => $postAfterSkip->count(),
-					'offset'  => $offset,
-					'total'   => $posts->count(), 
-					]);
+		$response 		= Helper::postResponse('0072', $postAfterSkip);
+		$response 		= array_merge($response,[
+						 'message' => sprintf($response['message'],$posts->count()),
+					     'count'   => $postAfterSkip->count(),
+					     'offset'  => $offset,
+					     'total'   => $posts->count(), 
+					     ]);
 
 		return response($response);
 	}
@@ -119,21 +112,22 @@ class PostController extends Controller
 		$user 	            = Auth::guard('api')->user()->user;
 		$data['user_id']    =  $user->id;
 		$post               = $this->post->create($data);
-		$postType			= ($request->offer_or_ask == 1)? 'Offer' : 'Ask' ;
+		$postType			= ($request->offer_or_ask == config('constants.OFFER'))? 
+							  'Offer' : 'Ask' ;
 		
 		if($files = $request->file('file')){
-			$path = base_path()."/resources/postImages";
 			foreach($files as $file)
 			{
-				$filename = ImageHelper::saveImage($file, $path);
+				$filename = ImageHelper::saveImage(
+							$file, config('constants.POST_IMAGE_FOLDER'));
 				$image    = $this->image->create([
 							'post_id' => $post->id,
-							'image_location' => $path.'/'.$filename,
+							'imageName' => $filename,
 							]);
 
-				array_push($images, $image->image_location);
+				array_push($images, $image->imageName);
 			}
-			$post['images'] = $images;
+			$post['images']  = $images;
 		}
 
 		$post['post_type']   = $postType;
@@ -153,9 +147,9 @@ class PostController extends Controller
 	public function getLocationByDistance(Request $request)
 	{
 		$offset = ($request->offset) ? $request->$offset : 0;
-		$data   = Helper::calculateLatLongRange( 
-				  self::DISTANCE , $request->latitude, $request->longitude
-				  );
+		$data   = Helper::calculateLatLongRange(
+				  config('constants.DISTANCE'),
+				  $request->latitude, $request->longitude);
 		
 		$posts  = $this->post->where([
 				  ['latitude', '<=', $data['lat_max']],
@@ -163,7 +157,7 @@ class PostController extends Controller
 				  ])->where([
 				  ['longitude', '<=', $data['long_max']],
 				  ['longitude', '>=', $data['long_min']],
-				  ])->skip($offset)->take(self::SIZE)->get();
+				  ])->skip($offset)->take(config('constants.SIZE')->get();
 
 		ImageHelper::includeImageUserInPost($posts);
 

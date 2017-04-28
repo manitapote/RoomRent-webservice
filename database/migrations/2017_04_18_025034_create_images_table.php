@@ -20,7 +20,7 @@ class CreateImagesTable extends Migration
                   ->references('id')
                   ->on('posts')
                   ->onDelete('cascade');
-            $table->string('image_location')->unique();
+            $table->string('imageName')->unique();
             $table->timestamps();
         });
     }

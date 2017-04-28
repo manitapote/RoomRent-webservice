@@ -1,19 +1,20 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Mail;
-use Validator;
-use App\Common;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Mail\ForgotPasswordEmail;
 use App\Mail\ActivationEmail;   
 use App\User;
 use App\Device;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\ResetPasswordRequest;
-use App\Http\Requests\RegisterRequest;
-use Helper;
+use App\Helper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Auth;
+use ImageHelper;
+use Mail;
+use Validator;
 
 class UserController extends Controller
 {
@@ -21,13 +22,7 @@ class UserController extends Controller
      * stores response to request
      * @var array
      */
-    public    $response = [];
-
-    /**
-     * object to bind to Common class
-     * @var Common
-     */
-    protected $codeMessage;
+    public $response = [];
 
     /**
      * object to bind to User model
@@ -42,19 +37,11 @@ class UserController extends Controller
     protected $device;
 
     /**
-     * constant to denote active and inactive status
-     */
-    const ACTIVE   = 1;
-    const INACTIVE = 0;
-
-    /**
-     * @param Common  $codeMessage
      * @param User    $user
      * @param Device  $device
      */
-    public function __construct(Common $codeMessage, User $user, Device $device)
+    public function __construct(User $user, Device $device)
     {
-        $this->codeMessage = $codeMessage;
         $this->user        = $user;
         $this->device      = $device;
     }
@@ -67,24 +54,23 @@ class UserController extends Controller
      */
     public function store(RegisterRequest $request)
     {
-        $user                     = $request->only([
-                                    'username','email','phone','name'
-                                    ]);
-        $user['password']         = Hash::make($request->password);
-        $user['activation_token'] = str_random(60);
+        $user                         = $request->only([
+                                        'username','email','phone','name'
+                                        ]);
+        $user['password']             = Hash::make($request->password);
+        $user['activation_token']     = str_random(60);
         
-        if($request->file){
-            $path                     = base_path()."/resources/profileImages";
-            $user['profileImageURL']  = $path.'/'.Helper::saveImage(
-                                        $request->file, $path);
+        if($request->file('file')){
+            $user['profileImageURL']  = ImageHelper::saveImage(
+                                        $request->file, 
+                                        config('constants.PROFILE_IMAGE_FOLDER')
+                                        );
         }
         $user = $this->user->create($user);
 
         Mail::to($user)->send(new activationEmail($user));
-        $response            = ['code' => '0013'];
-        $response['message'] = $this->codeMessage->code($response['code']);
-
-        return response($response);
+       
+        return response(  Helper::userResponse('0013'));
     }
 
     /**
@@ -95,45 +81,26 @@ class UserController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        $loginError = true;
         $field      = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ?
                       'email' : 'username';
         $user       = $this->user->where($field, $request->identity)->first();
 
-        if ($user) {
-            if (Hash::check($request->password, $user->password)) {
-                $loginError = false;
+        if(!($user && Hash::check($request->password, $user->password))){
+            $response            = Helper::userResponse('0012');
+            $response['message'] = sprintf($response['message'], $field);
 
-                if (!$user->active) {
-                    $response = [
-                                'uses' => $field,
-                                'code' => '0031',
-                                ];
-                } else{
-                    $user->update(['forgot_token' => null]);
-                    $request->merge(array('user_id' => $user->id));
-                    $device   = $this->user->storeDevice($request);
-                    $response = [
-                                'uses' => $field,
-                                'user' => $user,
-                                'code' => '0011',
-                                'api_token' => $device->api_token,
-                                ];
-                }
-            }
+            return response($response);
         }
-        if ($loginError) {
-            $response = [
-                        'uses' => $field,
-                        'code' => '0012',
-                        ];
-        }
+        
+        if (!$user->active) 
+            return response(Helper::userResponse('0031',$field));
+            
+        $user->update(['forgot_token' => null]);
+        $request->merge(array('user_id' => $user->id));
+        $device   = $this->user->storeDevice($request);
 
-        $response['message'] = sprintf(
-                               $this->codeMessage->code(
-                               $response['code']), $field);
-
-        return response($response);
+        return response(Helper::userResponse(
+                    '0011', $field, $user, $device->api_token));
     }
 
     /**
@@ -145,14 +112,13 @@ class UserController extends Controller
     public function activate($token)
     {
         $user = $this->user->whereActivationToken($token)->update([
-                'active' => self::ACTIVE,
+                'active' => config('constants.ACTIVE'),
                 'activation_token' => null,
                 ]);
 
-        $response['code']    = ($user) ? '0015' : '0052';
-        $response['message'] = $this->codeMessage->code($response['code']);
-
-        return response($response);
+        $code = ($user) ? '0015' : '0052';
+        
+        return response(Helper::userResponse($code));
     }
 
     public function update(Request $request)
@@ -168,19 +134,14 @@ class UserController extends Controller
      */
     public function mailForgotPassword(Request $request)
     {
-        $user = $this->user->whereEmail($request->email)->first();
+        $userQuery = $this->user->whereEmail($request->email);
+        $userQuery->update(['forgot_token' => str_random(60)]);
+        if (!$user = $userQuery->first()) 
+            return response(Helper::userResponse('0022'));
 
-        if ($user) {
-            $user->update(['forgot_token' => str_random(60)]);
-            Mail::to($user)->send(new ForgotPasswordEmail($user));
-            $response['code'] = "0023";
-        } else {
-            $response['code'] = "0022";
-        }
-
-        $response['message']  = $this->codeMessage->code($response['code']);
-
-        return response($response);
+        Mail::to($user)->send(new ForgotPasswordEmail($user));
+      
+        return response(Helper::userResponse('0023'));
     }
 
     /**
@@ -191,22 +152,15 @@ class UserController extends Controller
      */
     public function tokenCheckForgotPassword($token = null)
     {
-        $user = $this->user->whereForgotToken($token)->first();
+        $userQuery = $this->user->whereForgotToken($token);
 
-        if ($token != null && $user) {
-            $error = '';
-            $user->update([
-                'forgot_token' => null
-                ]);
-            $email = $user->email;
+        if (!($token != null && $user = $userQuery->first()))
+            return response(Helper::userResponse('0052'));
+        $error = '';
+        $userQuery->update(['forgot_token' => null]);
+        $email = $user->email;
 
-            return view('forgotPasswordForm', compact('email', 'error'));
-        }
-
-        $response['code']    = '0052';
-        $response['message'] = $this->codeMessage->code($response['code']);
-
-        return response($response);
+        return view('forgotPasswordForm', compact('email', 'error'));
     }
 
     /**
@@ -225,17 +179,11 @@ class UserController extends Controller
             $email = $request->email;
 
             return view('forgotPasswordForm', compact('email', 'error'));
-        } else {
-            $user           = $this->user->whereEmail($request->email)->first();
-            $user->update([
-                'password' => Hash::make($request->newPassword)
-                ]);
+        } 
+        $this->user->whereEmail($request->email)
+                   ->update(['password' => Hash::make($request->newPassword)]);
 
-            $response['code']    = '0024';
-            $response['message'] = $this->codeMessage->code($response['code']);
-        }
-
-        return response($response['message']);
+        return response(Helper::userResponse('0024'));
     }
 
     /**
@@ -249,21 +197,15 @@ class UserController extends Controller
     {
         $device = Auth::guard('api')->user();
 
-        if ($device && ($user =  $device->user)) {
-            if (Hash::check($request->oldPassword, $user->password)) {
-                $user->update([
-                    'password' => Hash::make($request->newPassword)
-                    ]);
-                $response ['code'] = '0001';
-            } else
-            $response ['code'] = '0021';
-        } else
-        $response = [
-        'code' => '0032',
-        ];
-        $response['message'] = $this->codeMessage->code($response['code']);
+        if (!($device && $user =  $device->user) )
+            return response(Helper::userResponse('0032'));
 
-        return response($response);
+        if (!Hash::check($request->oldPassword, $user->password))
+            return response(Helper::userResponse('0021'));
+         
+        $user->update(['password' => Hash::make($request->newPassword)]);
+              
+        return response(Helper::userResponse('0001'));
     }
 
     /**
@@ -273,11 +215,10 @@ class UserController extends Controller
      */
     public function logout(Request $request)
     {
-        $response['code']    = $this->device
-                             ->whereApiToken($request->api_token)
-                             ->delete() ? '0020' : '0052';
-        $response['message'] = $this->codeMessage->code($response['code']);
-
-        return response($response);
+        $code    = $this->device
+                        ->whereApiToken($request->api_token)
+                        ->delete() ? '0020' : '0052';
+        
+        return response(Helper::userResponse($code));
     }
 }
