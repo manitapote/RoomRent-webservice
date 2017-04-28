@@ -2,22 +2,23 @@
 
 namespace App\Helper;
 
-class Helper 
+use App\Image;
+use App\User;
+
+class ImageHelper 
 {
 	/**
-	 * makes array of given objects
+	 * add image and user to the post object
 	 * 
-	 * @param  Array  $items   array of objects
-	 * @param  string $field   field to retrieve from object
+	 * @param  Array  $posts   array of objects
 	 * @return Array        
 	 */
-	public function pushArray($items, $field)
+	public function includeImageUserInPost($posts)
 	{
-		$collection = [];
-		foreach ($items as $key => $item){
-			array_push($collection, $item->$field);	
-		}
-		return $collection;
+		collect($posts)->map(function($item){
+			     $item['images'] = $item->images();
+			     $item->user;
+			});
 	}
 
 	/**
@@ -32,6 +33,7 @@ class Helper
 		$filename = time().$file->getFilename().'.'.
 					$file->getClientOriginalExtension();
 		$file->move($path, $filename);
+		
 		return $filename;
 	}
 }

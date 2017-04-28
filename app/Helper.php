@@ -2,13 +2,46 @@
 
 namespace App;
 
-class Common {
+use App\Common;
 
-    /**
-     * array to store response code, message, errors
+class Helper
+{
+	const R = 6371;  //radius of earth
+
+	 /**
+     * array to store response code, message, errors or posts
      * @var array
      */
     protected $response = [];
+
+	public static function calculateLatLongRange($distance, $lat, $long)
+	{
+		$data             = [];
+		$r     	 		  = $distance / self::R ;
+		$lat  			  = Helper::convertDegreeToRadian($lat);
+		$long  			  = Helper::convertDegreeToRadian($long);
+		
+		$data['lat_max']  = Helper::convertRadianToDegree($lat + $r);
+		$data['lat_min']  = Helper::convertRadianToDegree($lat - $r);
+
+		$delLong          = asin(sin($r)/cos($lat));
+		
+		$data['long_max'] = Helper::convertRadianToDegree($long + $delLong);
+		$data['long_min'] = Helper::convertRadianToDegree($long - $delLong);
+
+		return $data; 
+
+	}
+
+	public static function convertDegreeToRadian($degree)
+	{
+		return ($degree * M_PI / 180);
+	}
+
+	public static function convertRadianToDegree($radian)
+	{
+		return ($radian * 180/ pi());
+	}
 
     /**
      * @param  string $code status code 
@@ -69,5 +102,16 @@ class Common {
             'data' => $request,
             ]);
         return $response;
+    }
+
+
+    static function postResponse($code, $posts)
+    {
+    	$response['code'] = $code;
+    	$response = array_merge($response,[
+    				'message' => Helper::code($response['code']),
+    				'post' => $posts,
+		    		]);
+    	return $response;
     }
 }

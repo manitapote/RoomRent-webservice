@@ -13,6 +13,7 @@ use App\Device;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\RegisterRequest;
+use Helper;
 
 class UserController extends Controller
 {
@@ -55,7 +56,7 @@ class UserController extends Controller
     {
         $this->codeMessage = $codeMessage;
         $this->user        = $user;
-        $this->device = $device;
+        $this->device      = $device;
     }
 
     /**
@@ -66,15 +67,21 @@ class UserController extends Controller
      */
     public function store(RegisterRequest $request)
     {
-        $user = $request->only(['username','email','phone','name','file']);
+        $user                     = $request->only([
+                                    'username','email','phone','name'
+                                    ]);
         $user['password']         = Hash::make($request->password);
         $user['activation_token'] = str_random(60);
+        
+        if($request->file){
+            $path                     = base_path()."/resources/profileImages";
+            $user['profileImageURL']  = $path.'/'.Helper::saveImage(
+                                        $request->file, $path);
+        }
         $user = $this->user->create($user);
 
         Mail::to($user)->send(new activationEmail($user));
-        $response = [
-        'code' => '0013',
-        ];
+        $response            = ['code' => '0013'];
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);
@@ -89,8 +96,9 @@ class UserController extends Controller
     public function login(LoginRequest $request)
     {
         $loginError = true;
-        $field = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $user   = $this->user->where($field, $request->identity)->first();
+        $field      = filter_var($request->identity, FILTER_VALIDATE_EMAIL) ?
+                      'email' : 'username';
+        $user       = $this->user->where($field, $request->identity)->first();
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
@@ -98,32 +106,32 @@ class UserController extends Controller
 
                 if (!$user->active) {
                     $response = [
-                    'uses' => $field,
-                    'code' => '0031',
-                    ];
+                                'uses' => $field,
+                                'code' => '0031',
+                                ];
                 } else{
                     $user->update(['forgot_token' => null]);
                     $request->merge(array('user_id' => $user->id));
-                    $device = $this->user->storeDevice($request);
+                    $device   = $this->user->storeDevice($request);
                     $response = [
-                    'uses' => $field,
-                    'user' => $user,
-                    'code' => '0011',
-                    'api_token' => $device->api_token,
-                    ];
+                                'uses' => $field,
+                                'user' => $user,
+                                'code' => '0011',
+                                'api_token' => $device->api_token,
+                                ];
                 }
             }
         }
         if ($loginError) {
             $response = [
-            'uses' => $field,
-            'code' => '0012',
-            ];
+                        'uses' => $field,
+                        'code' => '0012',
+                        ];
         }
 
         $response['message'] = sprintf(
-            $this->codeMessage->code($response['code']), $field
-            );
+                               $this->codeMessage->code(
+                               $response['code']), $field);
 
         return response($response);
     }
@@ -137,11 +145,11 @@ class UserController extends Controller
     public function activate($token)
     {
         $user = $this->user->whereActivationToken($token)->update([
-            'active' => self::ACTIVE,
-            'activation_token' => null,
-            ]);
+                'active' => self::ACTIVE,
+                'activation_token' => null,
+                ]);
 
-        $response['code'] = ($user) ? '0015' : '0052';
+        $response['code']    = ($user) ? '0015' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);
@@ -170,7 +178,7 @@ class UserController extends Controller
             $response['code'] = "0022";
         }
 
-        $response['message'] = $this->codeMessage->code($response['code']);
+        $response['message']  = $this->codeMessage->code($response['code']);
 
         return response($response);
     }
@@ -195,7 +203,7 @@ class UserController extends Controller
             return view('forgotPasswordForm', compact('email', 'error'));
         }
 
-        $response['code'] = '0052';
+        $response['code']    = '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);
@@ -265,9 +273,9 @@ class UserController extends Controller
      */
     public function logout(Request $request)
     {
-        $response['code'] = $this->device
-                            ->whereApiToken($request->api_token)
-                            ->delete() ? '0020' : '0052';
+        $response['code']    = $this->device
+                             ->whereApiToken($request->api_token)
+                             ->delete() ? '0020' : '0052';
         $response['message'] = $this->codeMessage->code($response['code']);
 
         return response($response);

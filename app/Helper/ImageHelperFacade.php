@@ -3,12 +3,12 @@
 namespace App\Helper;
 
 use Illuminate\Support\Facades\Facade;
-use App\Helper\Helper;
+use App\Helper\ImageHelper;
 
-class HelperFacade extends Facade
+class ImageHelperFacade extends Facade
 {
 	protected static function getFacadeAccessor()
 	{
-		return 'helper';
+		return 'imagehelper';
 	}
 }

@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Helper\Helper;
+use App\Helper\ImageHelper;
 
-class HelperServiceProvider extends ServiceProvider
+class ImageHelperServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -24,9 +24,9 @@ class HelperServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('helper',function()
+        $this->app->bind('imagehelper',function()
         {
-            return new Helper;
+            return new ImageHelper;
         });
     }
 }

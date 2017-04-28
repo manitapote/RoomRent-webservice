@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Image;
 
 class Post extends Model
 {
@@ -27,16 +28,6 @@ class Post extends Model
 	];
 
 	/**
-	 * Gets the image_location field of offer from image table
-	 * 	
-	 * @return relation returns offer_images as property of model
-	 */
-	public function offerImages()
-	{
-		return $this->hasMany('App\Image')->select('image_location');
-	}
-
-	/**
 	 * Gets the use belonged to the particular post
 	 * 
 	 * @return relationship returns user as property of the model
@@ -44,5 +35,15 @@ class Post extends Model
 	public function user()
 	{
 		return $this->belongsTo('App\User');
+	}
+
+	/**
+	 * Gets the image_location field of offer from image table
+	 * 	
+	 * @return relation returns offer_images as property of model
+	 */
+	public function images()
+	{
+		return Image::wherePostId($this->id)->pluck('image_location');
 	}
 }
