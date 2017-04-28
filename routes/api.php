@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,9 +17,8 @@ use App\Http\Controllers\Controller;
 */
 
 
-Route::get('/tees', 'TestController@test');
-Route::get('/activate/{token}', 'UserController@activate');
-Route::get('/forgotpassword/{token?}', 'UserController@tokenCheckForgotPassword');
+Route::get('/activate/{token}','UserController@activate');
+Route::get('/forgotpassword/{token?}','UserController@tokenCheckForgotPassword');
 
 Route::post('/login', 'UserController@login');
 Route::post('/register', 'UserController@store');
@@ -25,9 +26,16 @@ Route::post('/forgotpassword', 'UserController@mailForgotPassword');
 Route::post('/formPassword', 'UserController@forgotForm');
 Route::post('/password', 'UserController@forgotPassword');
 
-Route::post('/resetpassword', 'UserController@resetPassword');
-Route::post('/update','UserController@update');
-
-Route::post('/logout', 'UserController@logout');
 Route::post('/logintest','UserController@logintest');
 
+Route::group(['middleware' => 'auth:api'], function(){
+    Route::post('/update','UserController@update');
+    Route::post('/resetpassword', 'UserController@resetPassword');
+    Route::post('/logout', 'UserController@logout');
+    Route::post('/getUserPost', 'PostController@getUserPost');
+    Route::post('/getAllPost', 'PostController@getAllPost');
+    Route::post('/setPost','PostController@setPost');
+    Route::post('/getLocationByDistance','PostController@getLocationByDistance');
+    
+    Route::get('/getImage/{filename}','ImageController@getImage');
+});

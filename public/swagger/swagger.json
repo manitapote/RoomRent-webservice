@@ -1,0 +1,31 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Sample API",
+        "contact": {
+            "name": "Hiren Dave",
+            "email": "hdave10@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "basePath": "",
+    "schemes": [
+        "http"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/api/abc": {
+            "get": {
+                "description": "Returns basic information",
+                "responses": {
+                    "200": {
+                        "description": "Application Overview"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {}
+}

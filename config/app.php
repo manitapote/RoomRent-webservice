@@ -116,7 +116,7 @@ return [
     | the box, Laravel uses the Monolog PHP logging library. This gives
     | you a variety of powerful log handlers / formatters to utilize.
     |
-    | Available Settings: "single", "daily", "syslog", "errorlog"
+    | Available Settings: "single", "daily", "syslog", "errorlog"
     |
     */
 
@@ -176,6 +176,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\ImageHelperServiceProvider::class,
 
     ],
 
@@ -225,6 +226,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'ImageHelper' => App\Helper\ImageHelperFacade::class,
 
     ],
 
