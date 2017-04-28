@@ -29,13 +29,13 @@ Route::post('/password', 'UserController@forgotPassword');
 Route::post('/logintest','UserController@logintest');
 
 Route::group(['middleware' => 'auth:api'], function(){
-	Route::post('/update','UserController@update');
-	Route::post('/resetpassword', 'UserController@resetPassword');
-	Route::post('/logout', 'UserController@logout');
-	Route::post('/getUserPost', 'PostController@getUserPost');
-	Route::post('/getAllPost', 'PostController@getAllPost');
-	Route::post('/setPost','PostController@setPost');
-	Route::post('/getLocationByDistance','PostController@getLocationByDistance');
-	
-	Route::get('/getImage/{filename}','ImageController@getImage');
+    Route::post('/update','UserController@update');
+    Route::post('/resetpassword', 'UserController@resetPassword');
+    Route::post('/logout', 'UserController@logout');
+    Route::post('/getUserPost', 'PostController@getUserPost');
+    Route::post('/getAllPost', 'PostController@getAllPost');
+    Route::post('/setPost','PostController@setPost');
+    Route::post('/getLocationByDistance','PostController@getLocationByDistance');
+    
+    Route::get('/getImage/{filename}','ImageController@getImage');
 });

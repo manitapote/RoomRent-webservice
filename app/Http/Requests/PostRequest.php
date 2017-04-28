@@ -3,24 +3,24 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Common;
+use App\Helper;
 
 require app_path().'/validators.php';
 
 class PostRequest extends FormRequest
 {
     /**
-     * variable to bind to Common model
-     * @var App\Common
+     * Object to bind to Helper class
+     * @var App\Helper
      */
-    protected $common ;
+    protected $helper ;
 
     /**
-     * @param Common 
+     * @param Helper
      */
-    public function __construct(Common $common)
+    public function __construct(Helper $helper)
     {
-        $this->common = $common;
+        $this->helper = $helper;
     }
     /**
      * Determine if the user is authorized to make this request.
@@ -40,15 +40,15 @@ class PostRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'string|required',
+            'title'            => 'string|required',
             'post_description' => 'string|required',
-            'location' => 'required',
-            'latitude' => 'lat_long',
-            'longitude' => 'lat_long',
-            'price' => 'numeric|required',
-            'no_of_rooms' => 'numeric|required',
-            'file.*' => 'mimes:jpeg,bmp,png,jpg',
-            'offer_or_ask' => 'numeric|required',
+            'location'         => 'required',
+            'latitude'         => 'lat_long',
+            'longitude'        => 'lat_long',
+            'price'            => 'numeric|required',
+            'no_of_rooms'      => 'numeric|required',
+            'file.*'           => 'mimes:jpeg,bmp,png,jpg',
+            'offer_or_ask'     => 'numeric|required',
         ];
     }
 
@@ -59,9 +59,9 @@ class PostRequest extends FormRequest
     public function response(array $errors)
     {
          return response($this->common->message(
-                '0014', 
-                parent::except('api_token'),
-                $errors
-             ));
+            '0014',
+            parent::except('api_token'),
+            $errors
+        ));
     }
 }

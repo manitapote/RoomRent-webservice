@@ -3,22 +3,23 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Common;
+use App\Helper;
 
 class LoginRequest extends FormRequest
 {
     /**
-     * variable to bind to Common model
-     * @var App\Common
+     * Object to bind to Helper class
+     * 
+     * @var App\Helper
      */
-    protected $common ;
+    protected $helper ;
 
     /**
-     * @param Common 
+     * @param Helper
      */
-    public function __construct(Common $common)
+    public function __construct(Helper $helper)
     {
-        $this->common = $common;
+        $this->helper = $helper;
     }
 
 
@@ -40,10 +41,10 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-        'identity'      => 'required',
-        'password'      => 'required',
-        'device_type'   => 'required|numeric',
-        'device_token'  => 'required',
+            'identity'      => 'required',
+            'password'      => 'required',
+            'device_type'   => 'required|numeric',
+            'device_token'  => 'required',
         ];
     }
 
@@ -54,7 +55,10 @@ class LoginRequest extends FormRequest
      */
     public function response(array $errors)
     {
-       return response($this->common->message('0014', parent::except(['password']), $errors),400);
+       return response(
+           $this->helper->validationResponse('0014', parent::except(['password']),
+           $errors)
+       );
     }
 
 }

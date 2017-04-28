@@ -3,22 +3,23 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Common;
+use App\Helper;
 
 class ResetPasswordRequest extends FormRequest
 {
     /**
-     * variable to bind to Common model
-     * @var App\Common
+     * Object to bind to Helper class
+     * @var App\Helper
      */
-    protected $common ;
+    protected $helper ;
 
     /**
-     * @param Common 
+     * Constructor
+     * @param Helper $helper 
      */
-    public function __construct(Common $common)
+    public function __construct(Helper $helper)
     {
-        $this->common = $common;
+        $this->helper = $helper;
     }
 
     /**
@@ -51,9 +52,10 @@ class ResetPasswordRequest extends FormRequest
      */
     public function response(array $errors)
     {
-        return response($this->common->message(
+        return response($this->helper->validationResponse(
             '0014',
-             parent::except(['password']), 
-            $errors));
+            parent::except(['password']), 
+            $errors
+        ));
     }
 }
