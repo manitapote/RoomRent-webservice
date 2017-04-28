@@ -1,6 +1,5 @@
 <?php
 return [
-
 	'POST_IMAGE_FOLDER'    => 'postImages',
 	'PROFILE_IMAGE_FOLDER' => 'profileImages',
 	'ACTIVE'			   => 1,
@@ -9,4 +8,5 @@ return [
 	'ASK'				   => 2,
 	'DISTANCE'			   => 5,
 	'POST_SIZE'			   => 3,
+	'RADIUS'			   => 6371,
 ];
