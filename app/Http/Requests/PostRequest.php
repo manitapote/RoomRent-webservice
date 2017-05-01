@@ -58,7 +58,7 @@ class PostRequest extends FormRequest
      */
     public function response(array $errors)
     {
-         return response($this->common->message(
+         return response($this->helper->validationResponse(
             '0014',
             parent::except('api_token'),
             $errors

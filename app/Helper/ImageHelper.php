@@ -44,20 +44,28 @@ class ImageHelper
         return $filename;
     }
 
+    /**
+     * Gets the image from the folder
+     * 
+     * @param  String $filename Name of the image
+     * @return Array            Image file and mimetype of file
+     */
     public function getImage($filename)
     {
-        $data	= [];
-        $folder	= Storage::disk('local')->exists(
-        		"/".config('constants.PROFILE_IMAGE_FOLDER')."/".$filename
-        	)
-        	? config('constants.PROFILE_IMAGE_FOLDER')
-        	: config('constants.POST_IMAGE_FOLDER');
+        $folder = Storage::disk('local')->exists(
+                "/".config('constants.PROFILE_IMAGE_FOLDER')."/".$filename)
+                ? config('constants.PROFILE_IMAGE_FOLDER'):
+                (Storage::disk('local')->exists(
+                "/".config('constants.POST_IMAGE_FOLDER')."/".$filename) 
+                ? config('constants.POST_IMAGE_FOLDER') : null);
 
-        if(!($data['image'] = Storage::get("/$folder/".$filename))) {
+        if($folder == null)
+        {
             return false;
         }
 
-        $data['mimeType']	= Storage::mimeType("/$folder/".$filename);
+        $data['image'] = Storage::get("/$folder/".$filename);
+        $data['mimeType']   = Storage::mimeType("/$folder/".$filename);
 
         return $data;
     }

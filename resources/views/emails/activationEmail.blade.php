@@ -3,9 +3,9 @@
 
 Welcome to Room Rent {{$user->name}}.
 Please click the button to activate the account.
-@component('mail::button', ['url' => "http://192.168.0.136:81/api/activate/$user->activation_token"])
-<!-- ['url' => "http://192.168.0.136:8/api/activate/$user->activation_token"]) -->
-Register
+
+@component('mail::button', ['url' => $url])
+	Register
 @endcomponent
 
 Thanks,<br>

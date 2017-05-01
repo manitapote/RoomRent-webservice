@@ -11,6 +11,7 @@ use App\User;
 class ForgotPasswordEmail extends Mailable
 {
     use Queueable, SerializesModels;
+    public $url;
     public $user;
     /**
      * Create a new message instance.
@@ -20,6 +21,7 @@ class ForgotPasswordEmail extends Mailable
     public function __construct(User $user)
     {
         $this->user = $user;
+        $this->url = route('user.forgotpassword', $user->forgot_token);
         //
     }
 

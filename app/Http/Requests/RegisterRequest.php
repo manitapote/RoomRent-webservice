@@ -42,7 +42,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required',
             'phone'    => 'numeric',
             'username' => 'required|min:5|max:35|unique:users,username',
-            'file'     => 'mimes:jpeg, png, bmp, jpg',
+            'file'     => 'mimes:jpeg,png,bmp,jpg',
         ];
     }
 

@@ -17,25 +17,26 @@ use Illuminate\Support\Facades\Auth;
 */
 
 
-Route::get('/activate/{token}','UserController@activate');
-Route::get('/forgotpassword/{token?}','UserController@tokenCheckForgotPassword');
+Route::get('/activate/{token}','UserController@activate')->name('user.activate');
+Route::get('/forgotpassword/{token?}','UserController@tokenCheckForgotPassword')
+	->name('user.forgotpassword');
 
 Route::post('/login', 'UserController@login');
 Route::post('/register', 'UserController@store');
 Route::post('/forgotpassword', 'UserController@mailForgotPassword');
-Route::post('/formPassword', 'UserController@forgotForm');
+Route::post('/formpassword', 'UserController@forgotForm');
 Route::post('/password', 'UserController@forgotPassword');
 
 Route::post('/logintest','UserController@logintest');
 
 Route::group(['middleware' => 'auth:api'], function(){
     Route::post('/update','UserController@update');
-    Route::post('/resetpassword', 'UserController@resetPassword');
+    Route::post('/resetpassword', 'UserController@changePassword');
     Route::post('/logout', 'UserController@logout');
-    Route::post('/getUserPost', 'PostController@getUserPost');
-    Route::post('/getAllPost', 'PostController@getAllPost');
-    Route::post('/setPost','PostController@setPost');
-    Route::post('/getLocationByDistance','PostController@getLocationByDistance');
+    Route::post('/userpost', 'PostController@getUserPost');
+    Route::post('/allpost', 'PostController@getAllPost');
+    Route::post('/post/create','PostController@setPost');
+    Route::post('/postbylocation','PostController@getPostByLocation');
     
-    Route::get('/getImage/{filename}','ImageController@getImage');
+    Route::get('/image/{filename}','ImageController@getImage');
 });

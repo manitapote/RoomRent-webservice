@@ -67,7 +67,7 @@ class PostController extends Controller
     public function getUserPost(Request $request)
     {
         $offset	= ($request->offset) ?  $request->offset : 0;
-        $user  	= Auth::guard('api')->user()->user;    
+        $user  	= auth()->user()->user;    
         $posts 	= $user->posts;
     
         ImageHelper::includeImageUserInPostResponse($posts);
@@ -91,6 +91,7 @@ class PostController extends Controller
         	? $this->post
         	: $this->post->where('offer_or_ask',$request->offer_or_ask);
 
+        $count          = $posts->count();
         $postAfterSkip  = $posts->skip($offset)
             ->take(config('constants.POST_SIZE'))->get();
 
@@ -98,10 +99,10 @@ class PostController extends Controller
         
         $response = $this->helper->postResponse('0072', $postAfterSkip);
 
-        $response['message'] = sprintf($response['message'], $posts->count());
+        $response['message'] = sprintf($response['message'], $count);
         $response['count']   = $postAfterSkip->count();
         $response['offset']  = $offset;
-        $response['total']   = $posts->count();
+        $response['total']   = $count;
 
         return response($response);
     }
@@ -116,7 +117,7 @@ class PostController extends Controller
     {
         $images         	= [];
         $data           	= $request->all();
-        $user           	= Auth::guard('api')->user()->user;
+        $user           	= auth()->user()->user;
         $data['user_id']	=  $user->id;
 
         $post		= $this->post->create($data);
@@ -152,20 +153,19 @@ class PostController extends Controller
      * @param  Request $request latitude and longitude
      * @return Post             Json object
      */
-    public function getLocationByDistance(Request $request)
+    public function getPostByLocation(Request $request)
     {
-        $data   = $this->helper->calculateLatLongRange(
+            $data  = $this->helper->calculateLatLongRange(
                   config('constants.DISTANCE'),
                   $request->latitude, $request->longitude);
         
-        $posts  = $this->post
-            ->whereBetween('latitude', [$data['lat_min'], $data['lat_max']])
-            ->whereBetween('longitude', [$data['long_min'], $data['long_max']])
-            ->get();
+            $posts  = $this->post
+                ->whereBetween('latitude', [$data['lat_min'], $data['lat_max']])
+                ->whereBetween('longitude', [$data['long_min'], $data['long_max']])
+                ->get();
 
         ImageHelper::includeImageUserInPostResponse($posts);
 
         return $posts;
     }
 }
-

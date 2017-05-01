@@ -150,11 +150,12 @@ class UserController extends Controller
     public function mailForgotPassword(Request $request)
     {
         $user = $this->user->whereEmail($request->email)->first();
-        $user->update(['forgot_token' => str_random(60)]);
 
         if (!$user) {
             return response($this->helper->userResponse(['code' => '0022']));
         }
+
+        $user->update(['forgot_token' => str_random(60)]);
 
         Mail::to($user)->send(new ForgotPasswordEmail($user));
       
@@ -213,13 +214,10 @@ class UserController extends Controller
      * @param  ResetPasswordRequest
      * @return json
      */
-    public function resetPassword(ResetPasswordRequest $request)
+    public function changePassword(ResetPasswordRequest $request)
     {
-        $device = Auth::guard('api')->user();
-
-        if (!($device && $user =  $device->user)) {
-            return response($this->helper->userResponse(['code' => '0032']));
-        }
+        $device = auth()->user();
+        $user   =  $device->user;
 
         if (!Hash::check($request->oldPassword, $user->password)) {
             return response($this->helper->userResponse(['code' => '0021']));
