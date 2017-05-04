@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('activation_token')->nullable()->unique();
             $table->string('forgot_token')->nullable()->unique();
-            $table->string('profileImageURL')->nullable();
+            $table->string('profileImage')->nullable();
             $table->rememberToken();
             $table->timestamps();
         }); 

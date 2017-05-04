@@ -7,6 +7,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Device;
 use App\Http\Requests\LoginRequest;
 
+/**
+ * @SWG\Definition(
+ *     required={"username", "email", "password"},
+ *     type="object",
+ *     definition="User",
+ *     @SWG\Property(property="username", type="string", example="john"),
+ *     @SWG\Property(property="email", type="string", example="example@example.com"),
+ *     @SWG\Property(property="name", type="string", example="john"),
+ *     @SWG\Property(property="password", type="string"),
+ *     @SWG\Property(property="phone", type="integer", example="123456")
+ * )
+ */
+
 class User extends Authenticatable
 {
     use Notifiable;

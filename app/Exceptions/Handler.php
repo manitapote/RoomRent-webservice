@@ -3,8 +3,12 @@
 namespace App\Exceptions;
 
 use Exception;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use App\Helper;
+
 
 class Handler extends ExceptionHandler
 {
@@ -44,6 +48,22 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        $helper = new Helper;
+
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            return response([
+                'code'      => '0002',
+                'message'   => $helper->code('0002')
+            ], 405);
+        }
+
+        if ($exception instanceof NotFoundHttpException) {
+            return response([
+                'code'      => '0003',
+                'message'   => $helper->code('0003')
+            ], 404);
+        }
+
         return parent::render($request, $exception);
     }
 
@@ -56,8 +76,13 @@ class Handler extends ExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+        $helper = new Helper;
+
+        if ($request->expectsJson() || $request->segment(1) === "api") {
+            return response([
+                'code'      => '0004',
+                'message'   => $helper->code('0004')
+            ], 401);
         }
 
         return redirect()->guest(route('login'));

@@ -64,6 +64,28 @@ class PostController extends Controller
      * value ('userOffer|userAsk')
      * @return json object of multiple Post
      */
+    
+    /**
+     * @SWG\Post(
+     *     path="/userpost",
+     *     tags={"post"},
+     *     summary="Post of particuler user",
+     *     description="gets post for loggedin user",
+     *     operationId="getUserPost",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="offset",
+     *         description="gets the data skipping no of offset posts",
+     *         required=false,
+     *         type="integer"
+     *     ),
+     *     security={
+     *             {"api_key":{}}
+     *      },
+     *     @SWG\Response(response="405", description="Invalid inputs")
+     * )
+     */
     public function getUserPost(Request $request)
     {
         $offset	= ($request->offset) ?  $request->offset : 0;
@@ -83,6 +105,35 @@ class PostController extends Controller
      * 
      * @param  string $allPost
      * @return json of multiple Post either all offer or all ask
+     */
+    
+    /**
+     * @SWG\Post(
+     *     path="/allpost",
+     *     tags={"post"},
+     *     summary="post of all user",
+     *     description="gets all ask or offer for loggedin user",
+     *     operationId="getAllPost",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="offset",
+     *         description="gets the post skipping no of offset posts",
+     *         required=false,
+     *         type="integer"
+     *     ),
+     *     @SWG\Parameter(
+     *          in="formData",
+     *          name="offer_or_ask",
+     *          description="gets the post skipping no of offset posts",
+     *          required=true,
+     *          type="integer"
+     *     ),
+     *     security={
+     *             {"api_key":{}}
+     *      },
+     *     @SWG\Response(response="405", description="Invalid inputs")
+     * )
      */
     public function getAllPost(Request $request)
     {
@@ -112,6 +163,91 @@ class PostController extends Controller
      * 
      * @param PostRequest $request 
      * @return json of the Post data
+     */
+    
+    /**
+     * @SWG\Post(
+     *     path="/post/create",
+     *     tags={"post"},
+     *     summary="creates post",
+     *     description="creates post for loggedin user",
+     *     operationId="setPost",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="title",
+     *         description="title of post",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="post_description",
+     *         description="description of the post",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="location",
+     *         description="Address",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="latitude",
+     *         description="latitude of the location",
+     *         required=true,
+     *         type="number"
+     *     ),
+     *    @SWG\Parameter(
+     *         in="formData",
+     *         name="longitude",
+     *         description="longitude of the place",
+     *         required=true,
+     *         type="number"
+     *     ),
+     *    @SWG\Parameter(
+     *         in="formData",
+     *         name="price",
+     *         description="price of the post",
+     *         required=true,
+     *         type="integer"
+     *     ),
+     *    @SWG\Parameter(
+     *         in="formData",
+     *         name="no_of_rooms",
+     *         description="number of rooms",
+     *         required=true,
+     *         type="integer"
+     *     ),
+     *    @SWG\Parameter(
+     *         in="formData",
+     *         name="offer_or_ask",
+     *         description="1 for offer 2 for ask",
+     *         required=true,
+     *         type="integer"
+     *     ),
+     *    @SWG\Parameter(
+     *         in="formData",
+     *         name="file[0]",
+     *         description="image file",
+     *         required=false,
+     *         type="file"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="file[1]",
+     *         description="image file",
+     *         required=false,
+     *         type="file"
+     *     ),
+     *     security={
+     *             {"api_key":{}}
+     *      },
+     *     @SWG\Response(response="405", description="Invalid inputs")
+     * )
      */
     public function setPost(PostRequest $request)
     {
@@ -153,19 +289,48 @@ class PostController extends Controller
      * @param  Request $request latitude and longitude
      * @return Post             Json object
      */
+    
+     /**
+     * @SWG\Post(
+     *     path="/postbylocation",
+     *     tags={"post"},
+     *     summary="post near the given location",
+     *     description="gets post around a certain distance",
+     *     operationId="getPostByLocation",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="latitude",
+     *         description="latitude of a place",
+     *         required=true,
+     *         type="number"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="langitude",
+     *         description="longitude of a place",
+     *         required=true,
+     *         type="number"
+     *     ),
+     *     security={
+     *             {"api_key":{}}
+     *      },
+     *     @SWG\Response(response="405", description="Invalid inputs")
+     * )
+     */
     public function getPostByLocation(Request $request)
     {
-            $data  = $this->helper->calculateLatLongRange(
-                  config('constants.DISTANCE'),
-                  $request->latitude, $request->longitude);
-        
-            $posts  = $this->post
-                ->whereBetween('latitude', [$data['lat_min'], $data['lat_max']])
-                ->whereBetween('longitude', [$data['long_min'], $data['long_max']])
-                ->get();
+        $data  = $this->helper->calculateLatLongRange(
+              config('constants.DISTANCE'),
+              $request->latitude, $request->longitude);
+    
+        $posts = $this->post
+            ->whereBetween('latitude', [$data['lat_min'], $data['lat_max']])
+            ->whereBetween('longitude', [$data['long_min'], $data['long_max']])
+            ->get();
 
         ImageHelper::includeImageUserInPostResponse($posts);
 
-        return $posts;
+        return response(['post' => $posts]);
     }
 }

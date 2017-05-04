@@ -69,6 +69,10 @@ class Helper
             // basic messages
             '0000'  =>  'Error occurred',
             '0001'  =>  'Success',
+            '0002'  =>  'Route method not allowed',
+            '0003'  =>  'Route you are trying to access is not found',
+            '0004'  =>  'Unauthenticated. Validate your api token',
+
             // login messages
             '0011'  =>  'Successfully logged in',
             '0012'  =>  'Login failed. Incorrect %s and/or password',
