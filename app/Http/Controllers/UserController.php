@@ -16,6 +16,17 @@ use ImageHelper;
 use Mail;
 use Validator;
 
+/**
+ * @SWG\Swagger(
+ *     schemes={"http"},
+ *     host="roomrent.dev",
+ *     basePath="/api",
+ *     @SWG\Info(
+ *         title="Roomrent documentation API",
+ *         version="1.0.0"
+ *         )
+ * )
+ */
 class UserController extends Controller
 {
     /**
@@ -59,6 +70,56 @@ class UserController extends Controller
      * @param  RegisterRequest $request
      * @return json
      */
+    
+    /**
+     * @SWG\Post(
+     *     path="/register",
+     *     tags={"user"},
+     *     summary="create new user",
+     *     description="available for new user",
+     *     operationId="createUser",
+     *     consumes={"application/x-www-form-urlencoded"},
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="email",
+     *         format="string",
+     *         description="email",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="username",
+     *         description="username",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="name",
+     *         description="Name",
+     *         required=false,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="password",
+     *         description="password",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="phone",
+     *         description="Phone No.",
+     *         required=false,
+     *         type="integer"
+     *     ),
+     *     @SWG\Response(response="405", description="Invalid inputs")
+     * )
+     */
+  
     public function store(RegisterRequest $request)
     {
         $user = $request->only([
@@ -69,7 +130,7 @@ class UserController extends Controller
         $user['activation_token']   = str_random(60);
         
         if ($request->file('file')) {
-            $user['profileImageURL']  =
+            $user['profileImage']  =
                 ImageHelper::saveImage($request->file, config(
                     'constants.PROFILE_IMAGE_FOLDER'
                 ));
@@ -88,6 +149,48 @@ class UserController extends Controller
      * @param  LoginRequest $request
      * @return json
      */
+    
+    /**
+     * @SWG\Post(
+     *     path="/login",
+     *     tags={"user"},
+     *     summary="login a user",
+     *     description="User must be registered",
+     *     operationId="loginUser",
+     *     consumes="multipart/form-data",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="identity",
+     *         description="username or email",
+     *         required=true,
+     *         type="string"
+     *         ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="password",
+     *         description="password of user",
+     *         required=true,
+     *         type="string"
+     *         ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="device_type",
+     *         description="type of device",
+     *         required=true,
+     *         type="string"
+     *         ),
+     *     @SWG\Parameter(
+     *         in="formData",
+     *         name="device_token",
+     *         description="device specific token",
+     *         required=true,
+     *         type="strin"
+     *         ),
+     *     @SWG\Response(response="400", description="Invalid username or password")
+     * )
+     */
+
     public function login(LoginRequest $request)
     {
         $field  = filter_var($request->identity, FILTER_VALIDATE_EMAIL)
@@ -129,6 +232,24 @@ class UserController extends Controller
      * @param  string $token 
      * @return json
      */
+    /**
+     * @SWG\Get(
+     *     path="/activate/{token}",
+     *     tags={"user"},
+     *     summary="activates the user",
+     *     description="user need to be registered",
+     *     operationId="activate",
+     *     produces="application/json",
+     *     @SWG\Parameter(
+     *         in="path",
+     *         name="token",
+     *         description="activate user with the token",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Response(response="405", description="invalid token")
+     * )
+     */
     public function activate($token)
     {
         $user = $this->user->whereActivationToken($token)->update([
@@ -146,6 +267,25 @@ class UserController extends Controller
      * 
      * @param  Request
      * @return json
+     */
+    
+    /**
+     *@SWG\Post(
+     *  path="/forgotpassword",
+     *  tags={"user"},
+     *  summary="mails for new password",
+     *  description="only for already registered user",
+     *  operationId="mailForgotPassword",
+     *  produces="application/json",
+     *  @SWG\Parameter(
+     *      in="formData",
+     *      name="email",
+     *      description="Email that user registered with",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *  @SWG\Response(response="405", description="invalid inputs")
+     *)
      */
     public function mailForgotPassword(Request $request)
     {
@@ -168,6 +308,24 @@ class UserController extends Controller
      * @param  string|null
      * @return html_form|json
      */
+     /**
+     * @SWG\Get(
+     *     path="/forgotpassword/{token}",
+     *     tags={"user"},
+     *     summary="check token and display form for password reset",
+     *     description="user need to be registered",
+     *     operationId="tokenCheckForgotPassword",
+     *     produces="application/json",
+     *     @SWG\Parameter(
+     *         in="path",
+     *         name="token",
+     *         description="check the token for password reset",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Response(response="405", description="invalid token")
+     * )
+     */
     public function tokenCheckForgotPassword($token = null)
     {
         $user = $this->user->whereForgotToken($token)->first();
@@ -187,6 +345,39 @@ class UserController extends Controller
      * 
      * @param  Request
      * @return json
+     */
+     
+    /**
+     *@SWG\Post(
+     *  path="/forgotpassword/change",
+     *  tags={"user"},
+     *  summary="change password of user",
+     *  description="only registered user can change the password",
+     *  operationId="forgotPasswordChange",
+     *  produces="application/json",
+     *   @SWG\Parameter(
+     *      in="formData",
+     *      name="email",
+     *      description="email",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *  @SWG\Parameter(
+     *      in="formData",
+     *      name="newPassword",
+     *      description="new password to be set",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *   @SWG\Parameter(
+     *      in="formData",
+     *      name="newPassword_confirmation",
+     *      description="user whose password to be changed",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *  @SWG\Response(response="405", description="invalid inputs")
+     *)
      */
     public function forgotPassword(Request $request)
     {
@@ -214,6 +405,35 @@ class UserController extends Controller
      * @param  ResetPasswordRequest
      * @return json
      */
+    
+     /**
+     *@SWG\Post(
+     *  path="/changepassword",
+     *  tags={"user"},
+     *  summary="change password of loggedin user",
+     *  description="only loggedin user can change password",
+     *  operationId="changePassword",
+     *  produces="application/json",
+     *   @SWG\Parameter(
+     *      in="formData",
+     *      name="oldPassword",
+     *      description="old password",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *  @SWG\Parameter(
+     *      in="formData",
+     *      name="newPassword",
+     *      description="new password to be set",
+     *      required=true,
+     *      type="string"
+     *  ),
+     *  security={
+     *      {"api_key":{}}
+     *  },
+     *  @SWG\Response(response="405", description="invalid inputs")
+     *)
+     */
     public function changePassword(ResetPasswordRequest $request)
     {
         $device = auth()->user();
@@ -233,11 +453,24 @@ class UserController extends Controller
      * @param  Request
      * @return json
      */
+    /**
+     * @SWG\Post(
+     *     path="/logout",
+     *     tags={"user"},
+     *     summary="logout",
+     *     operationId="logout",
+     *     produces="application/json",
+     *     description="user must be logged in",
+     *     parameters={},
+     *     security={
+     *         {"api_key":{}}
+     *     },
+     *     @SWG\Response(response="default", description="successfully logout")
+     * )
+     */
     public function logout(Request $request)
     {
-        $code = $this->device
-            ->whereApiToken($request->api_token)
-            ->delete() ? '0020' : '0052';
+        $code = auth()->user()->delete()? '0020' : '0052';
         
         return response($this->helper->userResponse(['code' =>  $code]));
     }

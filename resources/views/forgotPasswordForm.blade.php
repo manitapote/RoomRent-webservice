@@ -8,7 +8,7 @@
 
   <h1>Room Rent</h1>
 
-  <form action = "/api/password" method="post">
+  <form action = "/api/forgotpassword/change" method="post">
     {{csrf_field()}}
     @if($error)
     @foreach ($error->all() as $message)

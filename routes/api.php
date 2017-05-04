@@ -25,13 +25,13 @@ Route::post('/login', 'UserController@login');
 Route::post('/register', 'UserController@store');
 Route::post('/forgotpassword', 'UserController@mailForgotPassword');
 Route::post('/formpassword', 'UserController@forgotForm');
-Route::post('/password', 'UserController@forgotPassword');
+Route::post('/forgotpassword/change', 'UserController@forgotPassword');
 
 Route::post('/logintest','UserController@logintest');
 
-Route::group(['middleware' => 'auth:api'], function(){
+Route::group(['middleware' => 'auth:api'], function() {
     Route::post('/update','UserController@update');
-    Route::post('/resetpassword', 'UserController@changePassword');
+    Route::post('/changepassword', 'UserController@changePassword');
     Route::post('/logout', 'UserController@logout');
     Route::post('/userpost', 'PostController@getUserPost');
     Route::post('/allpost', 'PostController@getAllPost');

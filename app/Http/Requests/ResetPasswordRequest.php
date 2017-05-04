@@ -40,7 +40,6 @@ class ResetPasswordRequest extends FormRequest
     public function rules()
     {
         return [
-        'api_token'   => 'required',
         'oldPassword' => 'required',
         'newPassword' => 'required',
         ];
