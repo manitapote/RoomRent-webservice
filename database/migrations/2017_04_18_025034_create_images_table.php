@@ -22,6 +22,7 @@ class CreateImagesTable extends Migration
                   ->onDelete('cascade');
             $table->string('imageName')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

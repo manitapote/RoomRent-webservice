@@ -43,7 +43,7 @@ return [
 
         'api' => [
             'driver' => 'token',
-            'provider' => 'users',
+            'provider' => 'api',
         ],
     ],
 
@@ -65,15 +65,16 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'api' => [
             'driver' => 'eloquent',
-            'model' => App\Device::class,
+            'model' => Roomrent\User\Models\Device::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'devices',
-        // ],
+
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => Roomrent\User\Models\User::class,
+        ],
     ],
 
     /*

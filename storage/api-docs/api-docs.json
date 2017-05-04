@@ -1,0 +1,908 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Roomrent API",
+        "version": "1.0"
+    },
+    "host": "roomrent.dev",
+    "basePath": "/api",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/image/{filename}": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "gets Image",
+                "description": "Image",
+                "operationId": "getImage",
+                "produces": [
+                    "image/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "filename",
+                        "in": "path",
+                        "description": "name of image file",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "create new user",
+                "description": "available for new user",
+                "operationId": "createUser",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "formData",
+                        "description": "email",
+                        "required": true,
+                        "type": "string",
+                        "format": "string"
+                    },
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "description": "username",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "formData",
+                        "description": "Name",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "description": "password",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "phone",
+                        "in": "formData",
+                        "description": "Phone No.",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "Profile Image",
+                        "required": true,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                }
+            }
+        },
+        "/update": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "update user profile",
+                "description": "available for logged in user",
+                "operationId": "updateUser",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "description": "username",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "formData",
+                        "description": "Name",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "phone",
+                        "in": "formData",
+                        "description": "Phone No.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "profile image",
+                        "required": false,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "login a user",
+                "description": "User must be registered",
+                "operationId": "loginUser",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identity",
+                        "in": "formData",
+                        "description": "username or email",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "description": "password of user",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "device_type",
+                        "in": "formData",
+                        "description": "type of device",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "device_token",
+                        "in": "formData",
+                        "description": "device specific token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Invalid username or password"
+                    }
+                }
+            }
+        },
+        "/activate/{token}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "activates the user",
+                "description": "user need to be registered",
+                "operationId": "activate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "activate user with the token",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "invalid token"
+                    }
+                }
+            }
+        },
+        "/forgotpassword": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "mails for new password",
+                "description": "only for already registered user",
+                "operationId": "mailForgotPassword",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "formData",
+                        "description": "Email that user registered with",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "invalid inputs"
+                    }
+                }
+            }
+        },
+        "/forgotpassword/{token}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "check token and display form for password reset",
+                "description": "user need to be registered",
+                "operationId": "tokenCheckForgotPassword",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "check the token for password reset",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "invalid token"
+                    }
+                }
+            }
+        },
+        "/forgotpassword/change": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "change password of user",
+                "description": "only registered user can change the password",
+                "operationId": "forgotPasswordChange",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "formData",
+                        "description": "email",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "newPassword",
+                        "in": "formData",
+                        "description": "new password to be set",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "newPassword_confirmation",
+                        "in": "formData",
+                        "description": "user whose password to be changed",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "invalid inputs"
+                    }
+                }
+            }
+        },
+        "/changepassword": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "change password of loggedin user",
+                "description": "only loggedin user can change password",
+                "operationId": "changePassword",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "oldPassword",
+                        "in": "formData",
+                        "description": "old password",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "newPassword",
+                        "in": "formData",
+                        "description": "new password to be set",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "logout",
+                "description": "user must be logged in",
+                "operationId": "logout",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "default": {
+                        "description": "successfully logout"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "Post according to query string",
+                "description": "gets post for loggedin user",
+                "operationId": "getPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "gets the data skipping no of offset posts",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "description": "gets the post of user",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "query",
+                        "description": "gets the offer or ask of user",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/create": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "creates post",
+                "description": "creates post for loggedin user",
+                "operationId": "setPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "formData",
+                        "description": "title of post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "post_description",
+                        "in": "formData",
+                        "description": "description of the post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "location",
+                        "in": "formData",
+                        "description": "Address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "no_of_rooms",
+                        "in": "formData",
+                        "description": "number of rooms",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file[0]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "file[1]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/{id}/update": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "updates post",
+                "description": "update post for loggedin user",
+                "operationId": "updatePost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "formData",
+                        "description": "title of post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "post_description",
+                        "in": "formData",
+                        "description": "description of the post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "location",
+                        "in": "formData",
+                        "description": "Address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "no_of_rooms",
+                        "in": "formData",
+                        "description": "number of rooms",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file[0]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "file[1]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "post id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/postbylocation": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "post near the given location",
+                "description": "gets post around a certain distance",
+                "operationId": "getPostByLocation",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of a place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of a place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "formData",
+                        "description": "gets post after offset value",
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/matchingposts": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "gets criteria matching post",
+                "description": "gets post matching criteria for loggedin user",
+                "operationId": "criteriaMachingPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "gets user of given id",
+                "description": "user of particuler id",
+                "operationId": "getParticulerUser",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "user id",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/{id}": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "gets post of given id",
+                "description": "Post of partuculer id",
+                "operationId": "getParticulerPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "post id",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "Error": {
+            "required": [
+                "code",
+                "message"
+            ],
+            "properties": {
+                "code": {
+                    "description": "Class ApiController",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "description": "Class ApiController",
+                    "type": "string"
+                }
+            }
+        },
+        "Post": {
+            "required": [
+                "title",
+                "post_description",
+                "location",
+                "latitude",
+                "longitude",
+                "price",
+                "no_of_rooms",
+                "offer_or_ask"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "example": "Title"
+                },
+                "post_description": {
+                    "type": "string",
+                    "example": "Room available at Patan"
+                },
+                "location": {
+                    "type": "string",
+                    "example": "Patan"
+                },
+                "latitude": {
+                    "type": "integer",
+                    "example": "000.00000000"
+                },
+                "longitude": {
+                    "type": "integer",
+                    "example": "000.00000000"
+                },
+                "price": {
+                    "type": "integer",
+                    "example": "3000"
+                },
+                "no_of_rooms": {
+                    "type": "integer",
+                    "example": "2"
+                },
+                "offer_or_ask": {
+                    "type": "integer",
+                    "example": "1"
+                }
+            },
+            "type": "object"
+        },
+        "User": {
+            "required": [
+                "username",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "example": "john"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "example@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "john"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "integer",
+                    "example": "123456"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "securityDefinitions": {
+        "api_key": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

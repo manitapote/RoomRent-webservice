@@ -23,8 +23,8 @@ class CreatePostsTable extends Migration
             $table->string('title');
             $table->longText('post_description');
             $table->string('location');
-            $table->decimal('latitude', 11,8)->nullable();
-            $table->decimal('longitude',11,8)->nullable();
+            $table->decimal('latitude', 11,8);
+            $table->decimal('longitude',11,8);
             $table->integer('price');
             $table->integer('no_of_rooms');
             $table->integer('offer_or_ask');
