@@ -10,14 +10,12 @@
 
   <form action = "/api/forgotpassword/change" method="post">
     {{csrf_field()}}
-    @if($error)
-    @foreach ($error->all() as $message)
-    <p>{{$message}}</p>
+     @if($data['error'])
+    @foreach($data['error'] as $message)
+      <p>{{$message}}</p>
     @endforeach
-
     @endif
-
-    <input type = "hidden" name = "email" value = {{$email}}>
+    <input type = "hidden" name = "token" value = {{$data['token']}}>
     <div>
       <label>Password</label>
       <input type="password" name = "newPassword" required/>
