@@ -67,7 +67,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Device::class,
+            'model' => Roomrent\User\Models\Device::class,
         ],
 
         // 'users' => [

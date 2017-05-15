@@ -16,27 +16,27 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
+Route::post('/register', 'User\Controller\UserController@store');
 
-Route::get('/activate/{token}','UserController@activate')->name('user.activate');
-Route::get('/forgotpassword/{token?}','UserController@tokenCheckForgotPassword')
-	->name('user.forgotpassword');
+Route::get('/activate/{token}','User\Controller\UserController@activate')->name('user.activate');
+Route::get('/forgotpassword/{token?}','User\Controller\UserController@tokenCheckForgotPassword')
+    ->name('user.forgotpassword');
 
-Route::post('/login', 'UserController@login');
-Route::post('/register', 'UserController@store');
-Route::post('/forgotpassword', 'UserController@mailForgotPassword');
-Route::post('/formpassword', 'UserController@forgotForm');
-Route::post('/forgotpassword/change', 'UserController@forgotPassword');
-
-Route::post('/logintest','UserController@logintest');
+Route::post('/login', 'User\Controller\UserController@login');
+Route::post('/forgotpassword', 'User\Controller\UserController@mailForgotPassword');
+Route::post('/formpassword', 'User\Controller\UserController@forgotForm');
+Route::post('/forgotpassword/change', 'User\Controller\UserController@forgotPassword');
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::post('/update','UserController@update');
-    Route::post('/changepassword', 'UserController@changePassword');
-    Route::post('/logout', 'UserController@logout');
-    Route::post('/userpost', 'PostController@getUserPost');
-    Route::post('/allpost', 'PostController@getAllPost');
-    Route::post('/post/create','PostController@setPost');
-    Route::post('/postbylocation','PostController@getPostByLocation');
+//     Route::post('/update','UserController@update');
+    Route::post('/changepassword', 'User\Controller\UserController@changePassword');
+    Route::post('/logout', 'User\Controller\UserController@logout');
+
+    Route::get('/post', 'Posts\Controller\PostController@getPost');
+
+    Route::post('/post/create','Posts\Controller\PostController@setPost');
+    Route::post('/postbylocation','Posts\Controller\PostController@getPostByLocation');
     
-    Route::get('/image/{filename}','ImageController@getImage');
+    Route::get('/image/{filename}','Images\Controller\ImageController@getImage');
 });
+
