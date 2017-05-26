@@ -7,6 +7,7 @@ use Roomrent\Helpers\ResponseHelper;
 use Roomrent\Helpers\ImageHelper;
 use Roomrent\User\Repositories\UserRepositoryInterface;
 use Roomrent\Mail\ActivationEmail;   
+use Auth;
 
 use Mail;
 
@@ -43,9 +44,9 @@ class UserService
     ResponseHelper $responseHelper,
     ImageHelper $imageHelper)
 	{
-		$this->user = $user;
+		$this->user           = $user;
     $this->responseHelper = $responseHelper;
-    $this->imageHelper = $imageHelper;
+    $this->imageHelper    = $imageHelper;
 	}
 
   /**
@@ -56,21 +57,64 @@ class UserService
    */
 	public function getUserDataFromRequest($request)
 	{
-		$user = $request->only([
-        'username','email','phone','name'
+    $user = $request->only([
+        'username','phone','name','file'
       ]);
 
-      $user['password']         = Hash::make($request->password);
-      $user['activation_token'] = str_random(60);
+    if (auth()->user()) {
+      return $user;
+    }
 
-      if ($request->file('file')) {
-          $user['profileImage'] = $this->imageHelper->saveImage($request->file, config(
-                  'constants.PROFILE_IMAGE_FOLDER'
-              ));
+    $user['email'] = $request->email;
+    $user['password']         = Hash::make($request->password);
+    $user['activation_token'] = str_random(60);
+
+    return $user;
+	}
+
+  public function handleFileFromRequest($user)
+  {
+    if ($user['file']) {
+      $user['profileImage'] = $this->imageHelper
+        ->saveImage($user['file'], config('constants.PROFILE_IMAGE_FOLDER'
+      ));
+    }
+
+    return $user;
+  }
+ 
+  /**
+   * Register or Update the user on the basis of coming url
+   * @param  Array $user 
+   * @return JSON
+   */
+  public function registerOrUpdate($user)
+  {
+    if (auth()->user()) {
+      $updateUser  = auth()->user()->user;
+      $userPresent = $this->findBy('username', $user['username']);
+      if ($userPresent) {
+        return response($this->responseHelper->jsonResponse([
+          'code' => '0082'],'username'));
       }
 
-      return $user;
-	}
+      $user = $this->handleFileFromRequest($user);
+
+      if ($this->update($updateUser, $user)) {
+        return response($this->responseHelper->jsonResponse([
+          'code' => '0001'],'updated'));
+      }
+
+      return responseHelper($this->responseHelper->jsonResponse([
+        'code' => '0000']));
+    }
+
+    $user = $this->handleFileFromRequest($user);
+
+    $user = $this->create($user);
+
+    return $this->checkUserAndMail($user);
+  }
 
   /**
    * Checks if user is present, active and password matches,
@@ -99,7 +143,7 @@ class UserService
       ]);
     }
 
-    $this->user->updateUser($user, ['forgot_token' => null]);
+    $this->user->update($user, ['forgot_token' => null]);
 
     $deviceInfo = $this->user->storeDeviceInfo($request, $user->id);
 
@@ -134,10 +178,10 @@ class UserService
     $update = "";
    
     if ($user) {
-      $update = $this->user->updateUser(
+      $update = $this->user->update(
        $user,[
        'active' => config('constants.ACTIVE'),
-        'activation_token' => null,
+       'activation_token' => null,
        ]);
     }
 
@@ -159,8 +203,53 @@ class UserService
     }
 
     Mail::to($user)->send(new activationEmail($user));
-    
+
     return response($this->responseHelper->jsonResponse(['code' => '0013']));
 
+  }
+
+  /**
+   * Creates new record
+   * @param  Array $user  binds to create function in Repository
+   * @return Object
+   */
+  public function create($user)
+  {
+    return $this->user->create($user);
+  }
+
+  /**
+   * Finds the record on the basis of given field and value
+   * @param  String $field attrubute of Object
+   * @param  String $value 
+   * @return Object 
+   */
+  public function findBy($field, $value)
+  {
+    return $this->user->findBy($field, $value)->first();
+  }
+
+  /**
+   * Updates the record
+   * @param  Object $user
+   * @param  Array $data 
+   * @return Integer
+   */
+  public function update($user, $data)
+  {
+     return $this->user->update($user, $data);
+  }
+
+  /**
+   * Updates Device Model
+   * @param  Object $device 
+   * @param  Array $data
+   * @return Integer    
+   */
+  public function updateDeviceInfo($device, $data)
+  {
+    $this->user->setDeviceModel();
+
+    return $this->user->update($device, $data);
   }
 }

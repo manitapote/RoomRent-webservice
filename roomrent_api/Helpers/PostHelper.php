@@ -16,19 +16,15 @@ class PostHelper
     */
 	public function calculateLatLongRange($distance, $latitude, $longitude)
 	{
-		$data             = [];
-		$ratio            = $distance / (config('constants.RADIUS'));
-
-		$latitude         = $this->convertDegreeToRadian($latitude);
-		$longitude        = $this->convertDegreeToRadian($longitude);
-
-		$data['lat_max']  = $this->convertRadianToDegree($latitude + $ratio);
-		$data['lat_min']  = $this->convertRadianToDegree($latitude - $ratio);
-
-		$delLong          = asin(sin($ratio)/cos($latitude));
-
-		$data['long_max'] = $this->convertRadianToDegree($longitude + $delLong);
-		$data['long_min'] = $this->convertRadianToDegree($longitude - $delLong);
+		$data                  = [];
+		$ratio                 = $distance / (config('constants.RADIUS'));
+		$latitude              = $this->convertDegreeToRadian($latitude);
+		$longitude             = $this->convertDegreeToRadian($longitude);
+		$data['latitude_max']  = $this->convertRadianToDegree($latitude + $ratio);
+		$data['latitude_min']  = $this->convertRadianToDegree($latitude - $ratio);
+		$delLong               = asin(sin($ratio)/cos($latitude));
+		$data['longitude_max'] = $this->convertRadianToDegree($longitude + $delLong);
+		$data['longitude_min'] = $this->convertRadianToDegree($longitude - $delLong);
 
 		return $data; 
 
