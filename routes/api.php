@@ -21,22 +21,30 @@ Route::post('/register', 'User\Controller\UserController@store');
 Route::get('/activate/{token}','User\Controller\UserController@activate')->name('user.activate');
 Route::get('/forgotpassword/{token?}','User\Controller\UserController@tokenCheckForgotPassword')
     ->name('user.forgotpassword');
-
 Route::post('/login', 'User\Controller\UserController@login');
 Route::post('/forgotpassword', 'User\Controller\UserController@mailForgotPassword');
 Route::post('/formpassword', 'User\Controller\UserController@forgotForm');
 Route::post('/forgotpassword/change', 'User\Controller\UserController@forgotPassword');
 
 Route::group(['middleware' => 'auth:api'], function() {
-//     Route::post('/update','UserController@update');
+    Route::get('/user/{id}', 'User\Controller\UserController@getParticulerUser');
+    Route::get('/image/{filename}','Images\Controller\ImageController@getImage');
+    Route::get('/post/{id}', 'Posts\Controller\PostController@getParticulerPost');
+
+    Route::post('/update','UserController@store');
+
     Route::post('/changepassword', 'User\Controller\UserController@changePassword');
     Route::post('/logout', 'User\Controller\UserController@logout');
 
     Route::get('/post', 'Posts\Controller\PostController@getPost');
 
+    Route::post('/post/{id}/update', 'Posts\Controller\PostController@updatePost');
     Route::post('/post/create','Posts\Controller\PostController@setPost');
     Route::post('/postbylocation','Posts\Controller\PostController@getPostByLocation');
+    Route::post('/update', 'User\Controller\UserController@store');
     
-    Route::get('/image/{filename}','Images\Controller\ImageController@getImage');
+    Route::post('/matchingposts', 
+    	'Posts\Controller\PostController@criteriaMatchingPosts');
 });
 
+Route::get('/fire', 'Posts\Controller\PostController@fire');

@@ -4,6 +4,7 @@ namespace Roomrent\Posts\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Roomrent\Helpers\ResponseHelper;
+use Illuminate\Http\Request;
 
 require app_path().'/validators.php';
 
@@ -39,7 +40,8 @@ class PostRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+        return  [
             'title'            => 'string|required',
             'post_description' => 'string|required',
             'location'         => 'required',
@@ -50,6 +52,9 @@ class PostRequest extends FormRequest
             'file.*'           => 'mimes:jpeg,bmp,png,jpg',
             'offer_or_ask'     => 'numeric|required',
         ];
+
+        
+
     }
 
      /**

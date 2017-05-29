@@ -42,192 +42,6 @@
                 ]
             }
         },
-        "/post": {
-            "get": {
-                "tags": [
-                    "post"
-                ],
-                "summary": "Post according to query string",
-                "description": "gets post for loggedin user",
-                "operationId": "getPost",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "gets the data skipping no of offset posts",
-                        "required": false,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "user",
-                        "in": "query",
-                        "description": "gets the post of user",
-                        "required": false,
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "offer_or_ask",
-                        "in": "query",
-                        "description": "gets the offer or ask of user",
-                        "required": false,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "405": {
-                        "description": "Invalid inputs"
-                    }
-                },
-                "security": [
-                    {
-                        "api_key": []
-                    }
-                ]
-            }
-        },
-        "/post/create": {
-            "post": {
-                "tags": [
-                    "post"
-                ],
-                "summary": "creates post",
-                "description": "creates post for loggedin user",
-                "operationId": "setPost",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "title",
-                        "in": "formData",
-                        "description": "title of post",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "post_description",
-                        "in": "formData",
-                        "description": "description of the post",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "location",
-                        "in": "formData",
-                        "description": "Address",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "latitude",
-                        "in": "formData",
-                        "description": "latitude of the location",
-                        "required": true,
-                        "type": "number"
-                    },
-                    {
-                        "name": "longitude",
-                        "in": "formData",
-                        "description": "longitude of the place",
-                        "required": true,
-                        "type": "number"
-                    },
-                    {
-                        "name": "price",
-                        "in": "formData",
-                        "description": "price of the post",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "no_of_rooms",
-                        "in": "formData",
-                        "description": "number of rooms",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "offer_or_ask",
-                        "in": "formData",
-                        "description": "1 for offer 2 for ask",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "file[0]",
-                        "in": "formData",
-                        "description": "image file",
-                        "required": false,
-                        "type": "file"
-                    },
-                    {
-                        "name": "file[1]",
-                        "in": "formData",
-                        "description": "image file",
-                        "required": false,
-                        "type": "file"
-                    }
-                ],
-                "responses": {
-                    "405": {
-                        "description": "Invalid inputs"
-                    }
-                },
-                "security": [
-                    {
-                        "api_key": []
-                    }
-                ]
-            }
-        },
-        "/postbylocation": {
-            "post": {
-                "tags": [
-                    "post"
-                ],
-                "summary": "post near the given location",
-                "description": "gets post around a certain distance",
-                "operationId": "getPostByLocation",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "latitude",
-                        "in": "formData",
-                        "description": "latitude of a place",
-                        "required": true,
-                        "type": "number"
-                    },
-                    {
-                        "name": "longitude",
-                        "in": "formData",
-                        "description": "longitude of a place",
-                        "required": true,
-                        "type": "number"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "formData",
-                        "description": "gets post after offset value",
-                        "type": "number"
-                    }
-                ],
-                "responses": {
-                    "405": {
-                        "description": "Invalid inputs"
-                    }
-                },
-                "security": [
-                    {
-                        "api_key": []
-                    }
-                ]
-            }
-        },
         "/register": {
             "post": {
                 "tags": [
@@ -236,9 +50,6 @@
                 "summary": "create new user",
                 "description": "available for new user",
                 "operationId": "createUser",
-                "consumes": [
-                    "application/x-www-form-urlencoded"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -276,8 +87,15 @@
                         "name": "phone",
                         "in": "formData",
                         "description": "Phone No.",
-                        "required": false,
+                        "required": true,
                         "type": "integer"
+                    },
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "Profile Image",
+                        "required": true,
+                        "type": "file"
                     }
                 ],
                 "responses": {
@@ -285,6 +103,62 @@
                         "description": "Invalid inputs"
                     }
                 }
+            }
+        },
+        "/update": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "update user profile",
+                "description": "available for logged in user",
+                "operationId": "updateUser",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "description": "username",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "formData",
+                        "description": "Name",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "phone",
+                        "in": "formData",
+                        "description": "Phone No.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "profile image",
+                        "required": false,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         },
         "/login": {
@@ -514,6 +388,418 @@
                 "responses": {
                     "default": {
                         "description": "successfully logout"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "Post according to query string",
+                "description": "gets post for loggedin user",
+                "operationId": "getPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "gets the data skipping no of offset posts",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "description": "gets the post of user",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "query",
+                        "description": "gets the offer or ask of user",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "details",
+                        "in": "query",
+                        "description": "either get detailed info or just summary of info",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/create": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "creates post",
+                "description": "creates post for loggedin user",
+                "operationId": "setPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "formData",
+                        "description": "title of post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "post_description",
+                        "in": "formData",
+                        "description": "description of the post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "location",
+                        "in": "formData",
+                        "description": "Address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "no_of_rooms",
+                        "in": "formData",
+                        "description": "number of rooms",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file[0]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "file[1]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/{id}/update": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "updates post",
+                "description": "update post for loggedin user",
+                "operationId": "updatePost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "formData",
+                        "description": "title of post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "post_description",
+                        "in": "formData",
+                        "description": "description of the post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "location",
+                        "in": "formData",
+                        "description": "Address",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "no_of_rooms",
+                        "in": "formData",
+                        "description": "number of rooms",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "file[0]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "file[1]",
+                        "in": "formData",
+                        "description": "image file",
+                        "required": false,
+                        "type": "file"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "post id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/postbylocation": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "post near the given location",
+                "description": "gets post around a certain distance",
+                "operationId": "getPostByLocation",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of a place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of a place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "formData",
+                        "description": "gets post after offset value",
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/matchingposts": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "gets criteria matching post",
+                "description": "gets post matching criteria for loggedin user",
+                "operationId": "criteriaMachingPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "latitude",
+                        "in": "formData",
+                        "description": "latitude of the location",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "longitude",
+                        "in": "formData",
+                        "description": "longitude of the place",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "name": "price",
+                        "in": "formData",
+                        "description": "price of the post",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offer_or_ask",
+                        "in": "formData",
+                        "description": "1 for offer 2 for ask",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "gets user of given id",
+                "description": "user of particuler id",
+                "operationId": "getParticulerUser",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "user id",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/post/{id}": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "gets post of given id",
+                "description": "Post of partuculer id",
+                "operationId": "getParticulerPost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "post id",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
                     }
                 },
                 "security": [

@@ -36,14 +36,21 @@ class RegisterRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'email'    => 'required|email|unique:users,email',
+        $data = [
             'name'     => 'alpha_spaces',
-            'password' => 'required',
             'phone'    => 'numeric',
-            'username' => 'required|min:5|max:35|unique:users,username',
+            'username' => 'required|min:5|max:35',
             'file'     => 'mimes:jpeg,png,bmp,jpg',
+
         ];
+
+        if (!auth()->user()) {
+            $data['email']    = 'required|email|unique:users,email';
+            $data['password'] = 'required';
+            $data['username'] = 'required|min:5|max:35|unique:users,username';
+        }
+
+        return $data;
     }
 
     /**

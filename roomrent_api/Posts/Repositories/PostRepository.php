@@ -4,9 +4,11 @@ namespace Roomrent\Posts\Repositories;
 
 use Roomrent\Posts\Models\Post;
 use Roomrent\Images\Models\Image;
+use Roomrent\User\Models\Device;
 use Roomrent\Posts\Repositories\PostRepositoryInterface;
+use Roomrent\Repository;
 
-class PostRepository implements PostRepositoryInterface
+class PostRepository extends Repository implements PostRepositoryInterface
 {
 	/**
 	 * Object to bind Post Model
@@ -21,88 +23,32 @@ class PostRepository implements PostRepositoryInterface
 	protected $image;
 
 	/**
+	 * Object to bind Device Model
+	 * @var  Object
+	 */
+	protected $device;
+
+	/**
 	 * Constructor
-	 * @param Post  $post  
-	 * @param Image $image 
+	 * @param Post    $post  
+	 * @param Image   $image
+	 * @param Device $device
 	 */	
-	public function __construct(Post $post, Image $image)
+	public function __construct(Post $post, Image $image, Device $device)
 	{
-		$this->post = $post;
+		$this->model = $post;
 		$this->image = $image;
+		$this->device = $device;
 	}
 
-	/**
-	 * Creates new post
-	 * @param  Object $post Post Model
-	 * @return Object       Post Model
-	 */
-	public function create($post)
+
+	public function setImageModel()
 	{
-        return $this->post->create($post);
+		$this->model = $this->image;
 	}
 
-	/**
-	 * Gets post by Id
-	 * @param  Integer $id 
-	 * @return Object       Post 
-	 */
-	public function getById($id)
+	public function setDeviceModel()
 	{
-			return $this->post->whereUserId($id);
-	}
-
-	/**
-	 * Gets post by particuler field
-	 * @param  String $field 
-	 * @param  Array  $data  
-	 * @return Array        Post
-	 */	
-	public function getByField($field, $data)
-	{
-		return $this->post->where($field, $data);
-	}
-
-	/**
-	 * Creates new image data
-	 * @param  Array  $data 
-	 * @return Object        Image Model
-	 */
-	public function createImage($data)
-	{
-		return $this->image->create($data);
-	}
-
-	/**
-	 * Gets posts by location
-	 * @param  Array $data 
-	 * @return Array        Post
-	 */
-	public function getByLocation($data)
-	{
-		return $this->post
-            ->whereBetween('latitude', [$data['lat_min'], $data['lat_max']])
-            ->whereBetween('longitude', [$data['long_min'], $data['long_max']]);
-            
-	}
-
-	/**
-	 * Appends the query to given query
-	 * @param  Query  $query 
-	 * @param  String $field field of post table
-	 * @param  Array  $data  
-	 * @return Query  
-	 */
-	public function appendQueryField($query, $field, $data)
-	{
-		return $query->where($field, $data);
-	}
-
-	/**
-	 * Gets all posts
-	 * @return Array array of post object
-	 */
-	public function getAll()
-	{
-		return $this->post;
+		$this->model = $this->device;
 	}
 }

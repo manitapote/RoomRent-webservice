@@ -5,6 +5,7 @@ namespace Roomrent\User\Models;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Roomrent\User\Requests\LoginRequest;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * @SWG\Definition(
@@ -19,7 +20,7 @@ use Roomrent\User\Requests\LoginRequest;
  * )
  */
 
-class User extends Model
+class User extends Authenticatable
 {
     use Notifiable;
 

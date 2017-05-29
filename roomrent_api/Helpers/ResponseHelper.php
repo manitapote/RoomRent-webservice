@@ -12,7 +12,7 @@ class ResponseHelper
         $codes = array(
             // basic messages
             '0000'  =>  'Error occurred',
-            '0001'  =>  'Success',
+            '0001'  =>  'Successfully %s',
             '0002'  =>  'Route method not allowed',
             '0003'  =>  'Route you are trying to access is not found',
             '0004'  =>  'Unauthenticated. Validate your api token',
@@ -56,6 +56,11 @@ class ResponseHelper
             '0063'  =>   'Invalid filename',
             '0064'  =>   'Image uploaded successfully',
 
+            //model related errors
+            '0081'  =>    'Record Not Found',
+            '0082'  =>    '%s already taken',
+
+            '0091'  =>     'Success',
             );
 
         return $codes[$code];
