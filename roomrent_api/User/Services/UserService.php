@@ -93,7 +93,7 @@ class UserService
     if (auth()->user()) {
       $updateUser  = auth()->user()->user;
       $userPresent = $this->findBy('username', $user['username']);
-      if ($userPresent) {
+      if ($userPresent && !($user['username'] == $updateUser->username)) {
         return response($this->responseHelper->jsonResponse([
           'code' => '0082'],'username'));
       }

@@ -305,6 +305,13 @@
   *         required=false,
   *         type="integer"
   *     ),
+  *     @SWG\Parameter(
+  *         in="query",
+  *         name="details",
+  *         description="either get detailed info or just summary of info",
+  *         required=false,
+  *         type="boolean"
+  *     ),
   *     security={
   *             {"api_key":{}}
   *     },
