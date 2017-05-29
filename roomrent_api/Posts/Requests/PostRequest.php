@@ -4,10 +4,7 @@ namespace Roomrent\Posts\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Roomrent\Helpers\ResponseHelper;
-<<<<<<< HEAD:roomrent_api/Posts/Requests/PostRequest.php
-=======
 use Illuminate\Http\Request;
->>>>>>> v2.0:roomrent_api/Posts/Requests/PostRequest.php
 
 require app_path().'/validators.php';
 

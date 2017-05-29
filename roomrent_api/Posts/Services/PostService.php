@@ -6,6 +6,7 @@ use Roomrent\Helpers\ResponseHelper;
 use Roomrent\Helpers\ImageHelper;
 use Roomrent\Posts\Repositories\PostRepositoryInterface;
 use Roomrent\Helpers\PostHelper;
+use Illuminate\Support\Collection;
 
 class PostService
 {
@@ -75,6 +76,9 @@ class PostService
     {
     	collect($posts)->map(function($item) {
             $item->user;
+            if ($item['user']['profileImage'])
+                $item['user']['profileImage'] = url('/api/image')
+                ."/".$item['user']['profileImage'];
         });
     }
 
@@ -89,14 +93,22 @@ class PostService
      */
     public function formatPostResponse($request, $code, $posts, $total, $count)
     {
-        $this->includeImageInPostResponse($posts);
-
         $offset       = $request->offset? $request->offset : 0;
         $currentCount = $offset + $count;
-    	$lastPage     = ($total == $currentCount)? true : false ;
+        $lastPage     = ($total == $currentCount)? true : false ;
 
-    	if (!$request->user == 'true')
-    		$this->includeUserInPostResponse($posts);
+        if (!$request->user == 'true' && !$request->details == 'false') {
+            $this->includeUserInPostResponse($posts);
+        }
+
+        if ($request->user == "false" && $request->details == 'true') {
+
+            $this->includeUserInPostResponse($posts);
+        }
+
+        if (!($request->details == "false")) {
+            $this->includeImageInPostResponse($posts);
+        }
 
         $response = $this->responseHelper->jsonResponse([
            'code'     => $code,
@@ -142,9 +154,9 @@ class PostService
      * @param  Integer $offset 
      * @return Array           Array of post object
      */
-    public function getSkipPosts($query, $offset = 0)
+    public function getSkipPosts($query, $offset = 0, $column = ['*'])
     {
-    	return $query->skip($offset)->take(config('constants.POST_SIZE'))->get();
+    	return $query->skip($offset)->take(config('constants.POST_SIZE'))->get($column);
     }
 
     /**
@@ -293,7 +305,7 @@ class PostService
         $locationQuery    = $this->getByLocation($data); 
         $priceQuery       = $this->post->appendWhereBetweenQuery(
         $locationQuery, 'price', ['price_min' => 0, 'price_max' => $data['price'] + 2000]);
-        $posts = $this->post->appendQueryField(
+        $posts            = $this->post->appendQueryField(
         $priceQuery, 'offer_or_ask', $requiredPostType)->get();
         if ($posts) {
            $this->includeUserInPostResponse($posts);
