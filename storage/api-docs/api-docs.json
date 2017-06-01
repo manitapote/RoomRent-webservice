@@ -4,7 +4,7 @@
         "title": "Roomrent API",
         "version": "1.0"
     },
-    "host": "roomrent.dev",
+    "host": "192.168.0.136:81",
     "basePath": "/api",
     "schemes": [
         "http"
@@ -677,6 +677,13 @@
                         "name": "offset",
                         "in": "formData",
                         "description": "gets post after offset value",
+                        "required": false,
+                        "type": "number"
+                    },
+                    {
+                        "name": "distance",
+                        "in": "formData",
+                        "description": "distance to get the post within given distance",
                         "type": "number"
                     }
                 ],
@@ -730,6 +737,13 @@
                         "in": "formData",
                         "description": "1 for offer 2 for ask",
                         "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "distance",
+                        "in": "formData",
+                        "description": "distance to get post within the given distance",
+                        "required": false,
                         "type": "integer"
                     }
                 ],
@@ -807,6 +821,25 @@
                         "api_key": []
                     }
                 ]
+            }
+        },
+        "/fire": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "fires notifications",
+                "description": "gets notification",
+                "operationId": "fire",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "405": {
+                        "description": "Invalid inputs"
+                    }
+                }
             }
         }
     },
