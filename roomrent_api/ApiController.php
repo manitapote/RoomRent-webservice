@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
  *
  * @SWG\Swagger(
  *     basePath="/api",
- *     host="192.168.0.136:81",
+ *     host="roomrent.dev",
  *     schemes={"http"},
  *     @SWG\Info(
  *         title="Roomrent API",

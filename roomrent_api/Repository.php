@@ -47,9 +47,9 @@ class Repository
 	 * @param  Object $model 
 	 * @return [type]        [description]
 	 */
-	public function delete($model)
+	public function destroy($id)
 	{
-
+		
 	}
 
 	/**

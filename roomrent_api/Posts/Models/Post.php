@@ -4,6 +4,7 @@ namespace Roomrent\Posts\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Roomrent\Images\Models\Image;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @SWG\Definition(
@@ -24,6 +25,7 @@ use Roomrent\Images\Models\Image;
  */
 class Post extends Model
 {
+    use SoftDeletes;
     /**
      * mass assignable property
      * @var array
@@ -41,6 +43,8 @@ class Post extends Model
     protected $hidden = [
      'deleted_at', 'user_id'
     ];
+
+    protected $dates = ['deleted_at'];
 
     /**
      * Gets the use belonged to the particular post

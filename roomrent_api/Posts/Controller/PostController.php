@@ -51,8 +51,8 @@ class PostController extends ApiController
         $total     = $postQuery->count();
         $column    = ($request->details == "false")?
             ['title','longitude', 'latitude', 'offer_or_ask', 'id'] : ['*'];
-        $posts     = $this->postService->getSkipPosts(
-            $postQuery, $request->offset, $column);
+        $posts = $this->postService->getSkipPosts(
+                $postQuery, $request, $column);
         
         return response($this->postService->formatPostResponse(
             $request, '0072', $posts, $total, $posts->count()
@@ -197,5 +197,4 @@ class PostController extends ApiController
 
        return response(["success" => $decoded->success]);
     }
-
 }

@@ -4,7 +4,7 @@
         "title": "Roomrent API",
         "version": "1.0"
     },
-    "host": "192.168.0.136:81",
+    "host": "roomrent.dev",
     "basePath": "/api",
     "schemes": [
         "http"

@@ -110,6 +110,12 @@ class PostService
             $this->includeImageInPostResponse($posts);
         }
 
+        if ($request->details == 'false')
+            return $this->responseHelper->jsonResponse([
+                'code' => $code,
+                'posts' =>$posts,
+                ], $total);
+
         $response = $this->responseHelper->jsonResponse([
            'code'     => $code,
            'posts'    => $posts,
@@ -154,9 +160,12 @@ class PostService
      * @param  Integer $offset 
      * @return Array           Array of post object
      */
-    public function getSkipPosts($query, $offset = 0, $column = ['*'])
+    public function getSkipPosts($query, $request, $column = ['*'])
     {
-    	return $query->skip($offset)->take(config('constants.POST_SIZE'))->get($column);
+        if ($request->details == "false") 
+            return $query->get($column);
+
+    	return $query->skip($request->offset)->take(config('constants.POST_SIZE'))->get($column);
     }
 
     /**
