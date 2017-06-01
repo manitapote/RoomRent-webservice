@@ -60,10 +60,15 @@ class Post extends Model
 	public function images()
 	{
 		$images   = Image::wherePostId($this->id)->pluck('imageName');
-		$imageURL = collect($images)->map(function($item) {
-            return url('/api/image')."/".$item;
-        });
 
-        return $imageURL;
+		if ($images) {
+			$imageURL = collect($images)->map(function($item) {
+        	    return url('/api/image')."/".$item;
+        	});
+        	return $imageURL;
+		}
+
+		return $images;
+
 	}
 }

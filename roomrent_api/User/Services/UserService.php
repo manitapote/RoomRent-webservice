@@ -98,7 +98,8 @@ class UserService
           'code' => '0082'],'username'));
       }
 
-      $user = $this->handleFileFromRequest($user);
+      if ($user['file'])
+        $user = $this->handleFileFromRequest($user);
 
       if ($this->update($updateUser, $user)) {
         return response($this->responseHelper->jsonResponse([
@@ -145,7 +146,11 @@ class UserService
 
     $this->user->update($user, ['forgot_token' => null]);
 
+
     $deviceInfo = $this->user->storeDeviceInfo($request, $user->id);
+
+    if ($user->profileImage)
+      $user->profileImage = url('/api/image')."/".$user->profileImage;
 
     return response($this->responseHelper->jsonResponse([
       'code'      => '0011', 

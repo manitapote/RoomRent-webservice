@@ -36,8 +36,9 @@ class PostRepository extends Repository implements PostRepositoryInterface
 	 */	
 	public function __construct(Post $post, Image $image, Device $device)
 	{
-		$this->model = $post;
-		$this->image = $image;
+		$this->post   = $post;
+		$this->model  = $post;
+		$this->image  = $image;
 		$this->device = $device;
 	}
 
@@ -50,5 +51,10 @@ class PostRepository extends Repository implements PostRepositoryInterface
 	public function setDeviceModel()
 	{
 		$this->model = $this->device;
+	}
+
+	public function setPostModel()
+	{
+		$this->model = $this->post;
 	}
 }
