@@ -192,8 +192,8 @@ class PostService
                 ]);
             }
             
-            return $post->images();
         }
+        return $post->images();
     }
 
     /**
@@ -266,17 +266,16 @@ class PostService
     public function fireNotification($data)
     {
        $posts = $this->matchingPosts($data);
-       if ($posts) {
-           $userIdArray = collect($posts)->pluck('user_id');
 
+       if ($posts) {
+           $userIdArray      = collect($posts)->pluck('user_id');
            $deviceTokenArray = $this->getDataFromDeviceModel('user_id', $userIdArray, 'device_token');
-          
-          $message = $data['post_description']; //'2 rooms in patan';
-          $title   = $data['title']; //'room in patan';
+           $message          = /*$data['post_description'];*/'2 rooms in patan';
+           $title            = /*$data['title']; */'room in patan';
           
           // $deviceTokenArray = ["dd9cl-vW_fY:APA91bH5eZ6kZJQnXl_w_2heLeu_xz3_YXh3prgrX3Iqmnjqo9r3afpTMOfzIOwXyKrQx_LK8ocebnI4MjJ2wRTnsr-HY85VpcVN_VwcfpzqJaIjW61L0ARWbhzw7O6nFrwe2ppLE-wQ"];
 
-          return $this->pushnotification($deviceTokenArray, $message, $title);
+           return $this->pushnotification($deviceTokenArray, $message, $title, $data);
         }
     }
 
@@ -302,13 +301,17 @@ class PostService
     {
         $requiredPostType = $data['offer_or_ask'] == config('constants.OFFER') ?
             config('constants.ASK') : config('constants.OFFER') ;
+
+        $this->post->setPostModel();
+
         $locationQuery    = $this->getByLocation($data); 
         $priceQuery       = $this->post->appendWhereBetweenQuery(
         $locationQuery, 'price', ['price_min' => 0, 'price_max' => $data['price'] + 2000]);
         $posts            = $this->post->appendQueryField(
         $priceQuery, 'offer_or_ask', $requiredPostType)->get();
         if ($posts) {
-           $this->includeUserInPostResponse($posts);
+            $this->includeImageInPostResponse($posts);
+            $this->includeUserInPostResponse($posts);
 
         return $posts;
        }
@@ -345,22 +348,18 @@ class PostService
      * @param  array  $data    
      * @return JSON 
      */
-    public function pushnotification($tokens, $message, $title, $data=["key" => "value"]) 
-    { 
-        $tokens = (array)$tokens;
-        $device_arr = [];
-        foreach ($tokens as  $token) {
-            $device_arr[] = $token;//device_token;
-        }
+    public function pushnotification($tokens, $message, $title, $data) 
+    {
+        $post = [];
         $key = env('FCM_SERVER_KEY');
         $fields = array(
-            'registration_ids' => $device_arr,
-            'notification' => array(
-                'body'=>$message,
-                'title'=>$title,
-                'sound'=>'default'),
-            'priority'=>'high',
-            'data'=>$data);
+            'registration_ids' => $tokens,
+            // 'notification' => array(
+            //     'body'=>$message,
+            //     'title'=>$title,
+            //     'sound'=>'default'),
+            'priority' => 'high',
+            'data' => $data);
         $headers = array(
             'Authorization: key='. $key,
             'Content-Type: application/json');

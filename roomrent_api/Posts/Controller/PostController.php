@@ -90,19 +90,18 @@ class PostController extends ApiController
     public function setPost(PostRequest $request)
     {
         $data     = $this->postService->getPostDataFromRequest($request);
-        $post	  = $this->postService->create($data);
+        $post     = $this->postService->create($data);
 
         if (!$post) {
             return $this->responseHelper->jsonResponse([
                 'code' => '0000']);
         }
 
-        $this->postService->fireNotification($data);
-
         $postType = $request->offer_or_ask == config('constants.OFFER')
         	? 'Offer' : 'Ask';
 
         $post['images'] = $this->postService->savePostImage($request, $post);
+        $this->postService->fireNotification($post);
 
         return $this->responseHelper->jsonResponse([
             'code'      => '0073',
@@ -125,7 +124,7 @@ class PostController extends ApiController
         if ($post = $this->postService->checkPostBelongToUser($id)) {
             $this->postService->update($post, $data);
             // $images = $this->postService->findBy('post_id', $post->id, 'image')->get();
-            $this->postService->savePostImage($request, $post->id);
+            $this->postService->savePostImage($request, $post);
 
             return response($this->responseHelper->jsonResponse([
                 'code' => '0001'],
@@ -169,13 +168,31 @@ class PostController extends ApiController
 
     public function fire()
     {
-        $data['price']        = 3000;
-        $data['no_of_rooms']  = 2;
-        $data['offer_or_ask'] = 1;
-        $data['latitude']     = 0.0;
-        $data['longitude']    = 0.0;
+        $data['price']            = 8000;
+        $data['no_of_rooms']      = 2;
+        $data['offer_or_ask']     = 2;
+        $data['latitude']         = 27.6894055;
+        $data['longitude']        = 85.3226683;
+        $data['id']               = 2;
+        $data['title']            = "Room in patan";
+        $data['post_description'] = "2 rooms well furnished available in patan";
+        $data['location']         = "Thapathali";
+        $data["created_at"]       = "2017-05-29 05:14:46";
+        $data['updated_at']       = "2017-05-29 05:14:46";
+        $data['images'] = [
+            "http://192.168.0.136:81/api/image/1496034888phpbHWTQv.png",
+            "http://192.168.0.136:81/api/image/1496034888php3WDC8X.png"
+          ];
+        $data['user'] = [
+            "id" => 5,
+            "name" => "Pote Manita",
+            "username" => "manita pote",
+            "email" => "mantiapote@ebpearls.com",
+            "phone" => "123545909",
+            "profileImage" => "http://192.168.0.136:81/api/image/1496034591phpeuG9bf.png"
+          ];
 
-        $result  = $this->postService->fireNotification($data);
+        return $this->postService->fireNotification($data);
         $decoded = json_decode($result);
 
        return response(["success" => $decoded->success]);

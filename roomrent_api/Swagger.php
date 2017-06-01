@@ -522,6 +522,13 @@
  *         in="formData",
  *         name="offset",
  *         description="gets post after offset value",
+ *         type="number",
+ *         required=false
+ *     ),
+ *      @SWG\Parameter(
+ *         in="formData",
+ *         name="distance",
+ *         description="distance to get the post within given distance",
  *         type="number"
  *     ),
  *     security={
@@ -566,6 +573,13 @@
    *         name="offer_or_ask",
    *         description="1 for offer 2 for ask",
    *         required=true,
+   *         type="integer"
+   *     ),
+   *      @SWG\Parameter(
+   *         in="formData",
+   *         name="distance",
+   *         description="distance to get post within the given distance",
+   *         required=false,
    *         type="integer"
    *     ),
    *     security={
@@ -619,3 +633,19 @@
   *     @SWG\Response(response="405", description="Invalid inputs")
   * )
   */
+ 
+
+ /**
+  *  @SWG\Get(
+  *     path="/fire",
+  *     tags={"post"},
+  *     summary="fires notifications",
+  *     description="gets notification",
+  *     operationId="fire",
+  *     produces={"application/json"},
+  *     parameters={},
+  *     @SWG\Response(response="405", description="Invalid inputs")
+  * )
+  */
+ 
+

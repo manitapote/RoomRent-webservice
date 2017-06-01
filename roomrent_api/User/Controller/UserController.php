@@ -75,8 +75,6 @@ class UserController extends ApiController
             ? 'email' : 'username';
         $user  = $this->userservice->findBy($field, $request->identity);
         
-        $user['profileImage'] = url('/api/image')."/".$user['profileImage'];
-
         return ($this->userservice->checkCredentialAndLogin(
             $user, 
             $request,
