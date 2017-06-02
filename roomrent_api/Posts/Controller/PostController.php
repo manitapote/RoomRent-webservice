@@ -197,4 +197,20 @@ class PostController extends ApiController
 
        return response(["success" => $decoded->success]);
     }
+
+    public function deletePosts(Request $request)
+    {
+        $postIdArray = $this->postService->getPostIdsOfUser();        
+        $commonId    = array_intersect($request->id, $postIdArray);
+        // return response($commonId);
+        
+        if (!$commonId)
+            return $this->responseHelper->jsonResponse(['code' => '0071']);
+
+        if (!$count = $this->postService->deletePosts($commonId))
+            return $this->responseHelper->jsonResponse(['code' => '0000']);
+
+        return $this->responseHelper->jsonResponse(['code' => '0001'], "deleted ".$count." records");
+    }
+
 }

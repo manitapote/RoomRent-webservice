@@ -7,9 +7,11 @@ use Roomrent\Helpers\ImageHelper;
 use Roomrent\Posts\Repositories\PostRepositoryInterface;
 use Roomrent\Helpers\PostHelper;
 use Illuminate\Support\Collection;
+use Roomrent\Traits\ImageTrait;
 
 class PostService
 {
+    use ImageTrait;
     /**
      * Object to bind PostRepositoryInterface
      * @var object Post
@@ -63,9 +65,23 @@ class PostService
     public function includeImageInPostResponse($posts)
     {
         collect($posts)->map(function($item) {
-            $item['images'] = $item->images();
+            $images         = $item->images()->pluck('imageName');
+            $item['images'] = $this->addURLInImage($images);
+
         });
     }
+
+    // public function addURLInImage($images)
+    // {
+    //     if ($images) {
+    //         $imageURL = collect($images)->map(function($item) {
+    //             return url('/api/image')."/".$item;
+    //         });
+    //         return $imageURL;
+    //     }
+
+    //     return $images;
+    // }
 
     /**
      * Adds user in the offer posts
@@ -77,8 +93,7 @@ class PostService
     	collect($posts)->map(function($item) {
             $item->user;
             if ($item['user']['profileImage'])
-                $item['user']['profileImage'] = url('/api/image')
-                ."/".$item['user']['profileImage'];
+                $item['user']['profileImage'] = $this->addURLInImage($item['user']['profileImage']);
         });
     }
 
@@ -202,7 +217,10 @@ class PostService
             }
             
         }
-        return $post->images();
+
+        $images = $post->images()->pluck('imageName');
+
+        return $this->addURLInImage($images);
     }
 
     /**
@@ -259,7 +277,8 @@ class PostService
     public function checkPostBelongToUser($id)
     {
         $postQuery = $this->findBy('id', $id, 'post');
-        $post      = $this->post->appendQueryField($postQuery, 'user_id', auth()->user()->user_id)->first();
+        $post      = $this->post->appendQueryField(
+            $postQuery, 'user_id', auth()->user()->user_id)->first();
         if ($post) {
             return $post;
         }
@@ -386,5 +405,17 @@ class PostService
         }
         curl_close($ch);
         return $result; 
+    }
+
+    public function getPostIdsOfUser()
+    {
+        $userId = auth()->user()->user_id;
+        $postIdArray = $this->post->findBy('user_id', $userId)->pluck('id')->toArray();
+       return $postIdArray;
+    }
+
+    public function deletePosts($id)
+    {
+        return $this->post->destroy($id);
     }
 }

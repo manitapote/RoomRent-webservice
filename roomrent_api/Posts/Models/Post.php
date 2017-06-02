@@ -63,16 +63,18 @@ class Post extends Model
      */
     public function images()
     {
-        $images   = Image::wherePostId($this->id)->pluck('imageName');
-
-        if ($images) {
-            $imageURL = collect($images)->map(function($item) {
-                return url('/api/image')."/".$item;
-            });
-            return $imageURL;
-        }
-
+        $images   = Image::wherePostId($this->id);
         return $images;
 
+    }
+   
+    protected static function boot()
+    {
+        parent::boot();
+
+        Post::deleting(function($post)
+        {
+            $post->images()->delete();
+        });
     }
 }

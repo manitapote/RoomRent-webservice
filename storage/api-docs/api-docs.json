@@ -841,6 +841,44 @@
                     }
                 }
             }
+        },
+        "/post/delete": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "delets post",
+                "description": "Delets the post matching the id",
+                "operationId": "deletePosts",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "body",
+                        "description": "post id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "\n  *       {\n  *         code : 0071,\n  *         message : Posts(s) not found\n  *       },\n  *       {\n  *         code : 0000,\n  *         message : Error Occured\n  *       }"
+                    },
+                    "200": {
+                        "description": "\n  *       {\n  *         code : 0001,\n  *         message : Successfully deleted\n  *       }"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
         }
     },
     "definitions": {
