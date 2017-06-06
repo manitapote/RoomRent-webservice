@@ -2,7 +2,7 @@
 
 namespace Roomrent\Traits;
 
-trait ImageTrait {
+trait HelperTrait {
 	
 	public function addURLInImage($images)
     {
@@ -14,5 +14,6 @@ trait ImageTrait {
         }
 
         return $images;
-    }	
+    }
+
 }

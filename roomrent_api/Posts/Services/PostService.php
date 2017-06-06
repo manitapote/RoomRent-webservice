@@ -7,11 +7,11 @@ use Roomrent\Helpers\ImageHelper;
 use Roomrent\Posts\Repositories\PostRepositoryInterface;
 use Roomrent\Helpers\PostHelper;
 use Illuminate\Support\Collection;
-use Roomrent\Traits\ImageTrait;
+use Roomrent\Traits\HelperTrait;
 
 class PostService
 {
-    use ImageTrait;
+    use HelperTrait;
     /**
      * Object to bind PostRepositoryInterface
      * @var object Post
@@ -70,18 +70,6 @@ class PostService
 
         });
     }
-
-    // public function addURLInImage($images)
-    // {
-    //     if ($images) {
-    //         $imageURL = collect($images)->map(function($item) {
-    //             return url('/api/image')."/".$item;
-    //         });
-    //         return $imageURL;
-    //     }
-
-    //     return $images;
-    // }
 
     /**
      * Adds user in the offer posts
@@ -250,7 +238,6 @@ class PostService
 
         return $this->post->appendWhereBetweenQuery(
             $postQuery,$field, $this->formatArray($field, $data));
-
     }
 
     /**
@@ -298,6 +285,7 @@ class PostService
        if ($posts) {
            $userIdArray      = collect($posts)->pluck('user_id');
            $deviceTokenArray = $this->getDataFromDeviceModel('user_id', $userIdArray, 'device_token');
+
            $message          = /*$data['post_description'];*/'2 rooms in patan';
            $title            = /*$data['title']; */'room in patan';
           
@@ -317,7 +305,10 @@ class PostService
     public function getDataFromDeviceModel($field, $fieldArray, $pluckField)
     {
         $this->post->setDeviceModel();
-        return $this->post->whereIn($field, $fieldArray)->pluck($pluckField);
+        $query =  $this->post->whereIn($field, $fieldArray);
+
+        return $this->post->whereNotNull($query, 'api_token')->pluck($pluckField);
+
     }
 
     /**
@@ -378,8 +369,8 @@ class PostService
      */
     public function pushnotification($tokens, $message, $title, $data) 
     {
-        $post = [];
-        $key = env('FCM_SERVER_KEY');
+        $post   = [];
+        $key    = env('FCM_SERVER_KEY');
         $fields = array(
             'registration_ids' => $tokens,
             // 'notification' => array(

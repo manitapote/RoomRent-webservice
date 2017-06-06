@@ -855,14 +855,18 @@
                 ],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "body",
+                        "name": "id[0]",
+                        "in": "formData",
                         "description": "post id",
                         "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "type": "array"
+                        "type": "number"
+                    },
+                    {
+                        "name": "id[1]",
+                        "in": "formData",
+                        "description": "post id",
+                        "required": false,
+                        "type": "number"
                     }
                 ],
                 "responses": {

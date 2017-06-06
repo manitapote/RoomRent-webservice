@@ -12,13 +12,13 @@ use Roomrent\User\Requests\LoginRequest;
 use Roomrent\User\Requests\RegisterRequest;
 use Roomrent\User\Requests\ResetPasswordRequest;
 use Roomrent\User\Requests\ForgotPasswordRequest;
-use Roomrent\Traits\ImageTrait;
+use Roomrent\Traits\HelperTrait;
 use Auth;
 use Mail;
 
 class UserController extends ApiController
 {
-    use ImageTrait;
+    use HelperTrait;
 
     /**
      * Object to bind to ResponseHelper class
@@ -223,7 +223,7 @@ class UserController extends ApiController
 
         $user['profileImage'] = $this->addURLInImage($user['profileImage']);
         return response($this->responseHelper->jsonResponse(
-            ['code' => '0091', 'user' => $user]));
+            ['code' => '0072', 'user' => $user], 1));
 
     }
 }
