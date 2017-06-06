@@ -39,7 +39,7 @@ class Repository
 	 */
 	public function findBy($field, $value)
 	{
-		return $this->model->where($field, $value);
+		return $this->model->where($field, $value)->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -49,7 +49,7 @@ class Repository
 	 */
 	public function destroy($id)
 	{
-		
+		return $this->model->destroy($id);
 	}
 
 	/**
@@ -70,7 +70,7 @@ class Repository
 	 */
 	public function getAll()
 	{
-		return $this->model;
+		return $this->model->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Repository
 	 */
 	public function getBetween($field, $data)
 	{
-		return $this->model->whereBetween($field, [$data[$field.'_min'], $data[$field.'_max']]);
+		return $this->model->whereBetween($field, [$data[$field.'_min'], $data[$field.'_max']])->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -93,7 +93,7 @@ class Repository
 	 */
 	public function appendWhereBetweenQuery($query, $field, $data)
 	{
-		return $query->whereBetween($field, [$data[$field."_min"], $data[$field.'_max']]);
+		return $query->whereBetween($field, [$data[$field."_min"], $data[$field.'_max']])->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -105,7 +105,7 @@ class Repository
 	 */
 	public function appendQueryField($query, $field, $data)
 	{
-		return $query->where($field, $data);
+		return $query->where($field, $data)->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -116,7 +116,11 @@ class Repository
 	 */
 	public function whereIn($field, $array)
 	{
-		return $this->model->whereIn($field, $array);
+		return $this->model->whereIn($field, $array)->orderBy('updated_at', 'desc');
 	}
 
+	public function whereNotNull($query, $field)
+	{
+		return $query->whereNotNull($field);
+	}
 }

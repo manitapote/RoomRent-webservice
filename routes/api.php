@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth:api'], function() {
     
     Route::post('/matchingposts', 
     	'Posts\Controller\PostController@criteriaMatchingPosts');
+    Route::post('/post/delete', 'Posts\Controller\PostController@deletePosts');
 });
 
 Route::get('/fire', 'Posts\Controller\PostController@fire');

@@ -648,4 +648,44 @@
   * )
   */
  
-
+ /**
+  *  @SWG\Post(
+  *     path="/post/delete",
+  *     tags={"post"},
+  *     summary="delets post",
+  *     description="Delets the post matching the id",
+  *     operationId="deletePosts",
+  *     produces={"application/json"},
+  *     @SWG\Parameter(
+  *         in="formData",
+  *         name="id[0]",
+  *         description="post id",
+  *         required=true,
+  *         type="number"
+  *     ),
+  *      @SWG\Parameter(
+  *         in="formData",
+  *         name="id[1]",
+  *         description="post id",
+  *         required=false,
+  *         type="number"
+  *     ),
+  *     security={
+  *             {"api_key":{}}
+  *      },
+  *     @SWG\Response(response="405", description="
+  *       {
+  *         code : 0071,
+  *         message : Posts(s) not found
+  *       },
+  *       {
+  *         code : 0000,
+  *         message : Error Occured
+  *       }"),  
+  *     @SWG\Response(response="200", description="
+  *       {
+  *         code : 0001,
+  *         message : Successfully deleted
+  *       }")
+  * )
+  */

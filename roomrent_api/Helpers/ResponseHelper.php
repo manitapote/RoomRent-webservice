@@ -59,8 +59,6 @@ class ResponseHelper
             //model related errors
             '0081'  =>    'Record Not Found',
             '0082'  =>    '%s already taken',
-
-            '0091'  =>     'Success',
             );
 
         return $codes[$code];
@@ -75,8 +73,10 @@ class ResponseHelper
         if (count($arg) == 2) {
             $arg[0]['message'] = sprintf($arg[0]['message'], $arg[1]);
         }
-
+        
         return $arg[0];
         
     }
+
+
 }

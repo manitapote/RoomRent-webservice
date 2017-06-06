@@ -7,9 +7,11 @@ use Roomrent\Helpers\ImageHelper;
 use Roomrent\Posts\Repositories\PostRepositoryInterface;
 use Roomrent\Helpers\PostHelper;
 use Illuminate\Support\Collection;
+use Roomrent\Traits\HelperTrait;
 
 class PostService
 {
+    use HelperTrait;
     /**
      * Object to bind PostRepositoryInterface
      * @var object Post
@@ -63,7 +65,9 @@ class PostService
     public function includeImageInPostResponse($posts)
     {
         collect($posts)->map(function($item) {
-            $item['images'] = $item->images();
+            $images         = $item->images()->pluck('imageName');
+            $item['images'] = $this->addURLInImage($images);
+
         });
     }
 
@@ -77,8 +81,7 @@ class PostService
     	collect($posts)->map(function($item) {
             $item->user;
             if ($item['user']['profileImage'])
-                $item['user']['profileImage'] = url('/api/image')
-                ."/".$item['user']['profileImage'];
+                $item['user']['profileImage'] = $this->addURLInImage($item['user']['profileImage']);
         });
     }
 
@@ -202,7 +205,10 @@ class PostService
             }
             
         }
-        return $post->images();
+
+        $images = $post->images()->pluck('imageName');
+
+        return $this->addURLInImage($images);
     }
 
     /**
@@ -232,7 +238,6 @@ class PostService
 
         return $this->post->appendWhereBetweenQuery(
             $postQuery,$field, $this->formatArray($field, $data));
-
     }
 
     /**
@@ -259,7 +264,8 @@ class PostService
     public function checkPostBelongToUser($id)
     {
         $postQuery = $this->findBy('id', $id, 'post');
-        $post      = $this->post->appendQueryField($postQuery, 'user_id', auth()->user()->user_id)->first();
+        $post      = $this->post->appendQueryField(
+            $postQuery, 'user_id', auth()->user()->user_id)->first();
         if ($post) {
             return $post;
         }
@@ -279,6 +285,7 @@ class PostService
        if ($posts) {
            $userIdArray      = collect($posts)->pluck('user_id');
            $deviceTokenArray = $this->getDataFromDeviceModel('user_id', $userIdArray, 'device_token');
+
            $message          = /*$data['post_description'];*/'2 rooms in patan';
            $title            = /*$data['title']; */'room in patan';
           
@@ -298,7 +305,10 @@ class PostService
     public function getDataFromDeviceModel($field, $fieldArray, $pluckField)
     {
         $this->post->setDeviceModel();
-        return $this->post->whereIn($field, $fieldArray)->pluck($pluckField);
+        $query =  $this->post->whereIn($field, $fieldArray);
+
+        return $this->post->whereNotNull($query, 'api_token')->pluck($pluckField);
+
     }
 
     /**
@@ -359,8 +369,8 @@ class PostService
      */
     public function pushnotification($tokens, $message, $title, $data) 
     {
-        $post = [];
-        $key = env('FCM_SERVER_KEY');
+        $post   = [];
+        $key    = env('FCM_SERVER_KEY');
         $fields = array(
             'registration_ids' => $tokens,
             // 'notification' => array(
@@ -386,5 +396,17 @@ class PostService
         }
         curl_close($ch);
         return $result; 
+    }
+
+    public function getPostIdsOfUser()
+    {
+        $userId = auth()->user()->user_id;
+        $postIdArray = $this->post->findBy('user_id', $userId)->pluck('id')->toArray();
+       return $postIdArray;
+    }
+
+    public function deletePosts($id)
+    {
+        return $this->post->destroy($id);
     }
 }

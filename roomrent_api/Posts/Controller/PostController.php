@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Storage;
 use Roomrent\Posts\Requests\PostRequest;
 use Roomrent\Posts\Services\PostService;
 use Roomrent\Helpers\ResponseHelper;
-use Roomrent\Posts\Repositories\PostRepositoryInterface;
+use Roomrent\Traits\HelperTrait;
 
 class PostController extends ApiController
 {
+    use HelperTrait;
+
     /**
      * Object to bind the responseHelper
      * @var ResponseHelper
@@ -51,9 +53,10 @@ class PostController extends ApiController
         $total     = $postQuery->count();
         $column    = ($request->details == "false")?
             ['title','longitude', 'latitude', 'offer_or_ask', 'id'] : ['*'];
+            
         $posts = $this->postService->getSkipPosts(
                 $postQuery, $request, $column);
-        
+      
         return response($this->postService->formatPostResponse(
             $request, '0072', $posts, $total, $posts->count()
         ));
@@ -71,14 +74,15 @@ class PostController extends ApiController
         $post = $this->postService->findBy('id', $id, 'post')->first();
 
         if (!$post) {
-            return $this->responseHelper->jsonResponse(['code' => '0081', 'post' => $post]);
+            return response($this->responseHelper->jsonResponse(['code' => '0081', 'post' => $post]));
         }
 
         $data[0] = $post;
 
         $this->postService->includeImageInPostResponse($data);
+        $this->postService->includeUserInPostResponse($data);
 
-        return $this->responseHelper->jsonResponse(['code' => '0091', 'post' => $post]);
+        return $this->responseHelper->jsonResponse(['code' => '0072', 'posts' => $post], 1);
     }
 
     /**
@@ -197,4 +201,25 @@ class PostController extends ApiController
 
        return response(["success" => $decoded->success]);
     }
+
+
+    /**
+     * Deletes the selected posts
+     * @param  Request $request 
+     * @return JSON
+     */
+    public function deletePosts(Request $request)
+    {
+        $postIdArray = $this->postService->getPostIdsOfUser();        
+        $commonId    = array_intersect($request->id, $postIdArray);
+        
+        if (!$commonId)
+            return $this->responseHelper->jsonResponse(['code' => '0071']);
+
+        if (!$count = $this->postService->deletePosts($commonId))
+            return $this->responseHelper->jsonResponse(['code' => '0000']);
+
+        return $this->responseHelper->jsonResponse(['code' => '0001'], "deleted ".$count." records");
+    }
+
 }
