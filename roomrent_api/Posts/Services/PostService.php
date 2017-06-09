@@ -140,52 +140,21 @@ class PostService
      */
     public function filterPost($request)
     {
-        $responsePost = [];
+        if ($request->user == "true") {
+            $postsQuery = $this->post->findBy('user_id',auth()->user()->user_id);
 
-        if (!$request->timestamp) {
-            $posts = $this->post->getAll()->get();
-
-            if ($posts) {
-                $this->includeUserAndImageInPosts($posts);
-                $count = $posts->count();
-
-                return response($this->responseHelper->jsonResponse(['code' => '0072', 'posts' => $posts], $count));
-            }
-
-            return response($this->responseHelper->jsonResponse(['code' => '0071']));
+            return ($request->offer_or_ask)
+                ? $this->post->appendQueryField(
+               $postsQuery, 'offer_or_ask', $request->offer_or_ask)
+                : $postsQuery;
         }
 
-        $data  = $this->getUpdatedAndInsertedPosts($request);
-        $deletedPosts = $this->getDeletedPosts($request);
-
-        if (!($data && $deletedPosts)) {
-            return $this->responseHelper->jsonResponse(['code' => '0071']);
+        if ($request->offer_or_ask) {
+            return $this->post->findBy('offer_or_ask', $request->offer_or_ask);
         }
 
-        if ($data['insertedPosts']) {
-            $responsePost['created'] = [
-                'posts' => $data['insertedPosts'],
-                'count' => count($data['insertedPosts']),
+        return $this->post->getAll();
 
-            ];
-        }
-
-        if ($data['updatedPosts']) {
-            $responsePost['updated'] = [
-                'posts' => $data['updatedPosts'],
-                'count' => count($data['updatedPosts']),
-            ];
-        }
-
-        if ($deletedPosts) {
-            $responsePost['deleted'] = [
-                'posts' => $deletedPosts,
-                'count' => $deletedPosts->count(),
-                ];
-        }
-
-        $responsePost['code'] = '0001';
-        return response($this->responseHelper->jsonResponse($responsePost, 'found records'));
     }
 
     /**
@@ -370,14 +339,21 @@ class PostService
     public function fireNotification($data)
     {
        $posts = $this->matchingPosts($data);
-
        if ($posts) {
            $userIdArray      = collect($posts)->pluck('user_id');
+           $userIdArray = $userIdArray->toArray();
+
+            foreach (
+            array_keys($userIdArray, auth()->user()->user_id) as $key) {
+                unset($userIdArray[$key]);
+            }
+
            $deviceTokenArray = $this->getDataFromDeviceModel('user_id', $userIdArray, 'device_token');
 
            $message          = /*$data['post_description'];*/'2 rooms in patan';
            $title            = /*$data['title']; */'room in patan';
-           $data['user'] = auth()->user()->user;
+           // $data['user'] = auth()->user()->user;
+           $this->includeUserInPostResponse(['0' => $data]);
           
           // $deviceTokenArray = ["dd9cl-vW_fY:APA91bH5eZ6kZJQnXl_w_2heLeu_xz3_YXh3prgrX3Iqmnjqo9r3afpTMOfzIOwXyKrQx_LK8ocebnI4MjJ2wRTnsr-HY85VpcVN_VwcfpzqJaIjW61L0ARWbhzw7O6nFrwe2ppLE-wQ"];
  
@@ -386,6 +362,15 @@ class PostService
            return event(new PostCreated($deviceTokenArray, $data)); 
            
         }
+    }
+
+    public function syncNotification($data)
+    {
+        $this->post->setDeviceModel();
+
+        $deviceTokenArray = $this->post->findBy('api_token', null, '!=')->pluck('device_token');
+
+        event(new PostCreated($deviceTokenArray, $data));
     }
 
     /**
@@ -473,4 +458,55 @@ class PostService
     {
         return $this->post->destroy($id);
     }
+
+    public function filterPostForSync($request)
+    {
+        $responsePost = [];
+
+        if (!$request->timestamp) {
+            $posts = $this->post->getAll()->get();
+
+            if ($posts) {
+                $this->includeUserAndImageInPosts($posts);
+                $count = $posts->count();
+
+                return response($this->responseHelper->jsonResponse(['code' => '0072', 'posts' => $posts], $count));
+            }
+
+            return response($this->responseHelper->jsonResponse(['code' => '0071']));
+        }
+
+        $data         = $this->getUpdatedAndInsertedPosts($request);
+        $data['deletedPosts'] = $this->getDeletedPosts($request);
+
+        if (($data['insertedPosts'] == null) && ($data['updatedPosts'] == null) && ($data['deletedPosts'] == null)) {
+            return $this->responseHelper->jsonResponse(['code' => '0071']);
+        }
+
+        if ($data['insertedPosts']) {
+            $responsePost['created'] = [
+                'posts' => $data['insertedPosts'],
+                'count' => count($data['insertedPosts']),
+
+            ];
+        }
+
+        if ($data['updatedPosts']) {
+            $responsePost['updated'] = [
+                'posts' => $data['updatedPosts'],
+                'count' => count($data['updatedPosts']),
+            ];
+        }
+
+        if ($data['deletedPosts']) {
+            $responsePost['deleted'] = [
+                'posts' => $data['deletedPosts'],
+                'count' => count($data['deletedPosts']),
+                ];
+        }
+
+        $responsePost['code'] = '0001';
+        return response($this->responseHelper->jsonResponse($responsePost, 'found records'));
+    }
+
 }

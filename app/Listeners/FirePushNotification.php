@@ -26,7 +26,6 @@ class FirePushNotification
      */
     public function handle(PostCreated $event)
     {
-        $post   = [];
         $key    = env('FCM_SERVER_KEY');
         $fields = array(
             'registration_ids' => $event->tokens,
@@ -50,6 +49,6 @@ class FirePushNotification
         }
         curl_close($ch);
 
-        return ($result); 
+        dd($result); 
     }
 }
