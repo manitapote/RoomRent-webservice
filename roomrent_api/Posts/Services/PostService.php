@@ -8,6 +8,7 @@ use Roomrent\Posts\Repositories\PostRepositoryInterface;
 use Roomrent\Helpers\PostHelper;
 use Illuminate\Support\Collection;
 use Roomrent\Traits\HelperTrait;
+use App\Events\PostCreated;
 
 class PostService
 {
@@ -139,21 +140,109 @@ class PostService
      */
     public function filterPost($request)
     {
-        if ($request->user == "true") {
-        	$postsQuery = $this->post->findBy('user_id',auth()->user()->user_id);
+        $responsePost = [];
 
-        	return ($request->offer_or_ask)
-        		? $this->post->appendQueryField(
-               $postsQuery, 'offer_or_ask', $request->offer_or_ask)
-        		: $postsQuery;
+        if (!$request->timestamp) {
+            $posts = $this->post->getAll()->get();
+
+            if ($posts) {
+                $this->includeUserAndImageInPosts($posts);
+                $count = $posts->count();
+
+                return response($this->responseHelper->jsonResponse(['code' => '0072', 'posts' => $posts], $count));
+            }
+
+            return response($this->responseHelper->jsonResponse(['code' => '0071']));
         }
 
-        if ($request->offer_or_ask) {
-            return $this->post->findBy('offer_or_ask', $request->offer_or_ask);
+        $data  = $this->getUpdatedAndInsertedPosts($request);
+        $deletedPosts = $this->getDeletedPosts($request);
+
+        if (!($data && $deletedPosts)) {
+            return $this->responseHelper->jsonResponse(['code' => '0071']);
         }
 
-        return $this->post->getAll();
+        if ($data['insertedPosts']) {
+            $responsePost['created'] = [
+                'posts' => $data['insertedPosts'],
+                'count' => count($data['insertedPosts']),
 
+            ];
+        }
+
+        if ($data['updatedPosts']) {
+            $responsePost['updated'] = [
+                'posts' => $data['updatedPosts'],
+                'count' => count($data['updatedPosts']),
+            ];
+        }
+
+        if ($deletedPosts) {
+            $responsePost['deleted'] = [
+                'posts' => $deletedPosts,
+                'count' => $deletedPosts->count(),
+                ];
+        }
+
+        $responsePost['code'] = '0001';
+        return response($this->responseHelper->jsonResponse($responsePost, 'found records'));
+    }
+
+    /**
+     * Gets the latest updated and inserted posts
+     *     
+     * @param  Request $request
+     * @return Array            array of posts if found else null
+     */
+    public function getUpdatedAndInsertedPosts($request)
+    {
+        $posts = $this->post->findBy('updated_at', $request->timestamp, '>')->get();
+
+        if ($posts) {
+            $this->includeUserAndImageInPosts($posts);
+    
+            $data['insertedPosts'] = array();
+            $data['updatedPosts']  = array();
+            
+            foreach($posts as $post)
+            {
+                if ($post->created_at == $post->updated_at) {
+                    array_push($data['insertedPosts'], $post);
+                    continue;
+                }  
+
+                array_push($data['updatedPosts'], $post);
+            }
+            return $data;
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets deleted posts
+     *         
+     * @param  Request $request 
+     * @return Array            array of posts if found else null
+     */
+    public function getDeletedPosts($request)
+    {
+        $deletedPostsQuery = $this->post->onlyTrashed();
+        $deletedPosts      = $this->post->appendQueryField($deletedPostsQuery, 'deleted_at', $request->timestamp, '>')->get();
+        
+        if ($deletedPosts->isEmpty()) {
+            return null;
+        }
+
+        $this->includeUserAndImageInPosts($deletedPosts);
+
+        return $deletedPosts;
+    }
+
+    public function includeUserAndImageInPosts($posts)
+    {
+        $this->includeImageInPostResponse($posts);
+        $this->includeUserInPostResponse($posts);
     }
 
     /**
@@ -288,10 +377,14 @@ class PostService
 
            $message          = /*$data['post_description'];*/'2 rooms in patan';
            $title            = /*$data['title']; */'room in patan';
+           $data['user'] = auth()->user()->user;
           
           // $deviceTokenArray = ["dd9cl-vW_fY:APA91bH5eZ6kZJQnXl_w_2heLeu_xz3_YXh3prgrX3Iqmnjqo9r3afpTMOfzIOwXyKrQx_LK8ocebnI4MjJ2wRTnsr-HY85VpcVN_VwcfpzqJaIjW61L0ARWbhzw7O6nFrwe2ppLE-wQ"];
-
-           return $this->pushnotification($deviceTokenArray, $message, $title, $data);
+ 
+           // return $this->pushnotification($deviceTokenArray, $message, $title, $data);
+           
+           return event(new PostCreated($deviceTokenArray, $data)); 
+           
         }
     }
 
@@ -360,44 +453,10 @@ class PostService
     }
 
     /**
-     * Post request to FCM
-     * @param  String $tokens
-     * @param  String $message 
-     * @param  String $title   
-     * @param  array  $data    
-     * @return JSON 
+     * Plucks only user if from the array of posts
+     * 
+     * @return Array Array of user id
      */
-    public function pushnotification($tokens, $message, $title, $data) 
-    {
-        $post   = [];
-        $key    = env('FCM_SERVER_KEY');
-        $fields = array(
-            'registration_ids' => $tokens,
-            // 'notification' => array(
-            //     'body'=>$message,
-            //     'title'=>$title,
-            //     'sound'=>'default'),
-            'priority' => 'high',
-            'data' => $data);
-        $headers = array(
-            'Authorization: key='. $key,
-            'Content-Type: application/json');
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        $result = curl_exec($ch);
-        if ($result === FALSE) { 
-            return false;
-        }
-        curl_close($ch);
-        return $result; 
-    }
-
     public function getPostIdsOfUser()
     {
         $userId = auth()->user()->user_id;
@@ -405,6 +464,11 @@ class PostService
        return $postIdArray;
     }
 
+    /**
+     * Deletes the post with given id
+     * @param  Integer $id 
+     * @return Integer     no of rows deleted
+     */
     public function deletePosts($id)
     {
         return $this->post->destroy($id);

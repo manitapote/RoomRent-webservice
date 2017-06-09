@@ -49,17 +49,9 @@ class PostController extends ApiController
      */
     public function getPost(Request $request)
     {
-        $postQuery = $this->postService->filterPost($request);
-        $total     = $postQuery->count();
-        $column    = ($request->details == "false")?
-            ['title','longitude', 'latitude', 'offer_or_ask', 'id'] : ['*'];
-            
-        $posts = $this->postService->getSkipPosts(
-                $postQuery, $request, $column);
-      
-        return response($this->postService->formatPostResponse(
-            $request, '0072', $posts, $total, $posts->count()
-        ));
+        $posts = $this->postService->filterPost($request);
+        
+        return response($posts);
     }
 
 
@@ -105,6 +97,7 @@ class PostController extends ApiController
         	? 'Offer' : 'Ask';
 
         $post['images'] = $this->postService->savePostImage($request, $post);
+
         $this->postService->fireNotification($post);
 
         return $this->responseHelper->jsonResponse([

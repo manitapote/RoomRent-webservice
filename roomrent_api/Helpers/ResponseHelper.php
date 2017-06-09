@@ -67,7 +67,9 @@ class ResponseHelper
     public function __call($name, $arg)
     {
         if ($name == 'jsonResponse') {
-            $arg[0]['message'] = $this->code($arg[0]['code']);
+            if (array_key_exists('code', $arg[0])) {
+                $arg[0]['message'] = $this->code($arg[0]['code']);
+            }
         }
 
         if (count($arg) == 2) {
