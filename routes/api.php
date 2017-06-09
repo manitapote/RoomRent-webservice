@@ -49,3 +49,5 @@ Route::group(['middleware' => 'auth:api'], function() {
 });
 
 Route::get('/fire', 'Posts\Controller\PostController@fire');
+
+Route::get('/syncpost', 'Posts\Controller\PostController@getPostsForSync');

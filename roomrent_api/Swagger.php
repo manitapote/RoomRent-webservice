@@ -689,3 +689,22 @@
   *       }")
   * )
   */
+
+/**
+  * @SWG\Get(
+  *     path="/syncpost",
+  *     tags={"post"},
+  *     summary="Get post for synchronization",
+  *     description="post for synchrocnization",
+  *     operationId="syncpost",
+  *     produces={"application/json"},
+  *     @SWG\Parameter(
+  *         in="query",
+  *         name="timestamp",
+  *         description="gets the data after the given timestamp",
+  *         required=false,
+  *         type="string"
+  *     ),
+  *     @SWG\Response(response="405", description="Invalid inputs")
+  * )
+  */

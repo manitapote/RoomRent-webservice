@@ -105,8 +105,10 @@ class PostController extends ApiController
         	? 'Offer' : 'Ask';
 
         $post['images'] = $this->postService->savePostImage($request, $post);
-        $this->postService->fireNotification($post);
 
+        $this->postService->syncNotification($post);
+        $this->postService->fireNotification($post);
+        
         return $this->responseHelper->jsonResponse([
             'code'      => '0073',
             'post'      => $post,
@@ -123,7 +125,7 @@ class PostController extends ApiController
      */
     public function updatePost(PostRequest $request, $id)
     {
-        $data      = $this->postService->getPostDataFromRequest($request);
+        $data     = $this->postService->getPostDataFromRequest($request);
        
         if ($post = $this->postService->checkPostBelongToUser($id)) {
             $this->postService->update($post, $data);
@@ -136,7 +138,7 @@ class PostController extends ApiController
         }
 
         return response($this->responseHelper->jsonResponse([
-            'code' => '0071']));
+            'code' => '0071'])); 
     }
 
     /**
@@ -221,5 +223,18 @@ class PostController extends ApiController
 
         return $this->responseHelper->jsonResponse(['code' => '0001'], "deleted ".$count." records");
     }
+
+    /**
+     * Gets post after timestamp for sync
+     * @param  Request $request 
+     * @return JSON response
+     **/
+    public function getPostsForSync(Request $request)
+    {
+        $posts = $this->postService->filterPostForSync($request);
+        
+        return response($posts);
+    }
+
 
 }
