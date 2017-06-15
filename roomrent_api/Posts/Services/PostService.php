@@ -197,7 +197,8 @@ class PostService
     public function getDeletedPosts($request)
     {
         $deletedPostsQuery = $this->post->onlyTrashed();
-        $deletedPosts      = $this->post->appendQueryField($deletedPostsQuery, 'deleted_at', $request->timestamp, '>')->get();
+        $deletedPosts      = $this->post->appendQueryField(
+            $deletedPostsQuery, 'deleted_at', $request->timestamp, '>')->get();
         
         if ($deletedPosts->isEmpty()) {
             return null;
@@ -208,6 +209,11 @@ class PostService
         return $deletedPosts;
     }
 
+    /**
+     * Includes User and Image information in post response
+     * @param  Post $posts 
+     * @return 
+     */
     public function includeUserAndImageInPosts($posts)
     {
         $this->includeImageInPostResponse($posts);
@@ -350,25 +356,24 @@ class PostService
 
            $deviceTokenArray = $this->getDataFromDeviceModel('user_id', $userIdArray, 'device_token');
 
-           $message          = /*$data['post_description'];*/'2 rooms in patan';
-           $title            = /*$data['title']; */'room in patan';
-           // $data['user'] = auth()->user()->user;
            $this->includeUserInPostResponse(['0' => $data]);
-          
-          // $deviceTokenArray = ["dd9cl-vW_fY:APA91bH5eZ6kZJQnXl_w_2heLeu_xz3_YXh3prgrX3Iqmnjqo9r3afpTMOfzIOwXyKrQx_LK8ocebnI4MjJ2wRTnsr-HY85VpcVN_VwcfpzqJaIjW61L0ARWbhzw7O6nFrwe2ppLE-wQ"];
- 
-           // return $this->pushnotification($deviceTokenArray, $message, $title, $data);
            
            return event(new PostCreated($deviceTokenArray, $data)); 
            
         }
     }
 
+    /**
+     * Gets devicet_token for sync notification
+     * @param  Array $data 
+     * @return fires event       
+     **/
     public function syncNotification($data)
     {
         $this->post->setDeviceModel();
 
-        $deviceTokenArray = $this->post->findBy('api_token', null, '!=')->pluck('device_token');
+        $deviceTokenArray = $this->post->findBy(
+            'api_token', null, '!=')->pluck('device_token');
 
         event(new PostCreated($deviceTokenArray, $data));
     }
@@ -470,10 +475,12 @@ class PostService
                 $this->includeUserAndImageInPosts($posts);
                 $count = $posts->count();
 
-                return response($this->responseHelper->jsonResponse(['code' => '0072', 'posts' => $posts], $count));
+                return response($this->responseHelper->jsonResponse(
+                    ['code' => '0072', 'posts' => $posts], $count));
             }
 
-            return response($this->responseHelper->jsonResponse(['code' => '0071']));
+            return response($this->responseHelper->jsonResponse(
+                ['code' => '0071']));
         }
 
         $data         = $this->getUpdatedAndInsertedPosts($request);
@@ -506,6 +513,7 @@ class PostService
         }
 
         $responsePost['code'] = '0001';
+        
         return response($this->responseHelper->jsonResponse($responsePost, 'found records'));
     }
 

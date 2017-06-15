@@ -106,10 +106,9 @@ class PostController extends ApiController
 
         $post['images'] = $this->postService->savePostImage($request, $post);
 
-        return $this->postService->syncNotification($post);
-        return $this->postService->fireNotification($post);
+        $this->postService->syncNotification($post);
+        $this->postService->fireNotification($post);
         
-
         return $this->responseHelper->jsonResponse([
             'code'      => '0073',
             'post'      => $post,
@@ -225,6 +224,11 @@ class PostController extends ApiController
         return $this->responseHelper->jsonResponse(['code' => '0001'], "deleted ".$count." records");
     }
 
+    /**
+     * Gets post after timestamp for sync
+     * @param  Request $request 
+     * @return JSON response
+     **/
     public function getPostsForSync(Request $request)
     {
         $posts = $this->postService->filterPostForSync($request);
