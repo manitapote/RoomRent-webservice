@@ -4,6 +4,7 @@ namespace Roomrent\Posts\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Roomrent\Images\Models\Image;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -75,6 +76,10 @@ class Post extends Model
         Post::deleting(function($post)
         {
             $post->images()->delete();
+        });
+
+        static::addGlobalScope('updated_at', function (Builder $builder) {
+            $builder->orderBy('updated_at', 'desc');
         });
     }
 }
