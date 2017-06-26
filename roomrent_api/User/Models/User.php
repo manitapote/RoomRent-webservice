@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Roomrent\User\Requests\LoginRequest;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @SWG\Definition(
@@ -23,6 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use Notifiable;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -41,7 +43,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password', 'remember_token', 'active', 'activation_token', 'updated_at',
-        'created_at', 'activation_token', 'forgot_token'
+        'created_at', 'activation_token', 'forgot_token', 'deleted_at',
     ];
 
    /**

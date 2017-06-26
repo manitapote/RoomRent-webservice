@@ -37,9 +37,12 @@ class Repository
 	 * @param  String $value
 	 * @return Object
 	 */
-	public function findBy($field, $value)
+	public function findBy($field, $value, $operater = '=')
 	{
-		return $this->model->where($field, $value);
+		
+		return $this->model->where($field, $operater, $value);
+
+		// return $this->model->where($field, $value)->orderBy('updated_at', 'desc');
 	}
 
 	/**
@@ -47,9 +50,9 @@ class Repository
 	 * @param  Object $model 
 	 * @return [type]        [description]
 	 */
-	public function delete($model)
+	public function destroy($id)
 	{
-
+		return $this->model->destroy($id);
 	}
 
 	/**
@@ -103,9 +106,9 @@ class Repository
 	 * @param  Array  $data
 	 * @return Query
 	 */
-	public function appendQueryField($query, $field, $data)
+	public function appendQueryField($query, $field, $data, $operater = '=')
 	{
-		return $query->where($field, $data);
+		return $query->where($field, $operater, $data);
 	}
 
 	/**
@@ -119,4 +122,13 @@ class Repository
 		return $this->model->whereIn($field, $array);
 	}
 
+	public function whereNotNull($query, $field)
+	{
+		return $query->whereNotNull($field);
+	}
+
+	public function onlyTrashed()
+	{
+		return $this->model->onlyTrashed();
+	}
 }

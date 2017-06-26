@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 namespace Roomrent\Helpers;
 
@@ -59,8 +59,6 @@ class ResponseHelper
             //model related errors
             '0081'  =>    'Record Not Found',
             '0082'  =>    '%s already taken',
-
-            '0091'  =>     'Success',
             );
 
         return $codes[$code];
@@ -69,14 +67,18 @@ class ResponseHelper
     public function __call($name, $arg)
     {
         if ($name == 'jsonResponse') {
-            $arg[0]['message'] = $this->code($arg[0]['code']);
+            if (array_key_exists('code', $arg[0])) {
+                $arg[0]['message'] = $this->code($arg[0]['code']);
+            }
         }
 
         if (count($arg) == 2) {
             $arg[0]['message'] = sprintf($arg[0]['message'], $arg[1]);
         }
-
+        
         return $arg[0];
         
     }
+
+
 }

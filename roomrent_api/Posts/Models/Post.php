@@ -4,6 +4,8 @@ namespace Roomrent\Posts\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Roomrent\Images\Models\Image;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @SWG\Definition(
@@ -24,6 +26,7 @@ use Roomrent\Images\Models\Image;
  */
 class Post extends Model
 {
+    use SoftDeletes;
     /**
      * mass assignable property
      * @var array
@@ -42,6 +45,8 @@ class Post extends Model
      'deleted_at', 'user_id'
     ];
 
+    protected $dates = ['deleted_at'];
+
     /**
      * Gets the use belonged to the particular post
      * 
@@ -59,16 +64,22 @@ class Post extends Model
      */
     public function images()
     {
-        $images   = Image::wherePostId($this->id)->pluck('imageName');
-
-        if ($images) {
-            $imageURL = collect($images)->map(function($item) {
-                return url('/api/image')."/".$item;
-            });
-            return $imageURL;
-        }
-
+        $images   = Image::wherePostId($this->id);
         return $images;
 
+    }
+   
+    protected static function boot()
+    {
+        parent::boot();
+
+        Post::deleting(function($post)
+        {
+            $post->images()->delete();
+        });
+
+        static::addGlobalScope('updated_at', function (Builder $builder) {
+            $builder->orderBy('updated_at', 'desc');
+        });
     }
 }

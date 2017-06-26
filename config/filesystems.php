@@ -45,7 +45,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => resource_path(),
+            'root' => storage_path(),
             'url' =>env('APP_URL').'/resources',//storage_path('app'),
         ],
 

@@ -883,6 +883,33 @@
                     }
                 ]
             }
+        },
+        "/syncpost": {
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "summary": "Get post for synchronization",
+                "description": "post for synchrocnization",
+                "operationId": "syncpost",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "gets the data after the given timestamp",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "405": {
+                        "description": "Invalid response"
+                    }
+                }
+            }
         }
     },
     "definitions": {
